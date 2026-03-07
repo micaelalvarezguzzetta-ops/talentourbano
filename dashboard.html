@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TALENTOURBANO — Mi perfil</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050508;--surface:#0f0f14;--card:#13131a;
+  --border:#1a1a24;--accent:#00e5ff;--accent2:#ff3366;
+  --text:#f0f0f5;--muted:#5a5a70;
+}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(5,5,8,.9);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;height:58px;
+}
+.nav-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;
+  display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--text);
+}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-user{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:var(--muted)}
+.nav-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#0088aa);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#000;flex-shrink:0;
+}
+.btn-logout{
+  font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  padding:.45rem 1rem;border-radius:6px;
+  border:1px solid var(--border);background:transparent;color:var(--muted);
+  cursor:pointer;transition:all .2s;
+}
+.btn-logout:hover{color:var(--accent2);border-color:var(--accent2)}
+
+/* LAYOUT */
+.layout{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;display:grid;grid-template-columns:260px 1fr;gap:1.5rem}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:1rem}
+.profile-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:1.5rem;text-align:center;position:relative;overflow:hidden;
+}
+.profile-card::before{
+  content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,229,255,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.profile-avatar{
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#0088aa);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#000;
+  margin:0 auto 1rem;border:3px solid rgba(0,229,255,.2);
+}
+.profile-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:.2rem}
+.profile-genre{font-size:.75rem;color:var(--accent);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}
+.profile-city{font-size:.75rem;color:var(--muted)}
+.profile-plan{
+  display:inline-flex;align-items:center;gap:.3rem;
+  margin-top:.75rem;font-size:.68rem;font-weight:700;letter-spacing:.1em;
+  padding:.25rem .75rem;border-radius:20px;
+}
+.plan-free{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid rgba(0,229,255,.2)}
+.plan-premium{background:rgba(255,51,102,.1);color:var(--accent2);border:1px solid rgba(255,51,102,.2)}
+
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1rem}
+.pstat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center}
+.pstat-n{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--accent)}
+.pstat-l{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+
+/* MENU */
+.side-menu{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.75rem}
+.menu-item{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.65rem .75rem;border-radius:8px;
+  font-size:.85rem;cursor:pointer;transition:all .15s;
+  text-decoration:none;color:var(--text);margin-bottom:2px;
+}
+.menu-item:hover{background:var(--surface)}
+.menu-item.active{background:rgba(0,229,255,.08);color:var(--accent)}
+.menu-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.menu-badge{
+  margin-left:auto;background:var(--accent2);color:#fff;
+  font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:10px;
+}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;gap:1.25rem}
+
+/* WELCOME BANNER */
+.welcome-banner{
+  background:linear-gradient(135deg,rgba(0,229,255,.06) 0%,rgba(255,51,102,.04) 100%);
+  border:1px solid rgba(0,229,255,.12);border-radius:14px;
+  padding:1.5rem 1.75rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+}
+.wb-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:1px;margin-bottom:.2rem}
+.wb-sub{font-size:.82rem;color:var(--muted);line-height:1.5}
+.wb-btn{
+  flex-shrink:0;padding:.65rem 1.4rem;border-radius:8px;border:none;
+  background:var(--accent);color:#000;font-family:'Space Grotesk',sans-serif;
+  font-size:.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  cursor:pointer;white-space:nowrap;transition:all .2s;
+}
+.wb-btn:hover{background:#00c8e0;transform:translateY(-1px)}
+
+/* QUICK ACTIONS */
+.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}
+.qa{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:1rem;text-align:center;cursor:pointer;transition:all .2s;
+}
+.qa:hover{border-color:rgba(0,229,255,.2);transform:translateY(-2px)}
+.qa-icon{font-size:1.5rem;margin-bottom:.5rem}
+.qa-label{font-size:.75rem;font-weight:600;color:var(--muted)}
+
+/* FEED CREATE */
+.post-create{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem;
+  display:flex;gap:.85rem;
+}
+.post-avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),#0088aa);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#000;
+}
+.post-input-wrap{flex:1}
+.post-input{
+  width:100%;background:transparent;border:none;color:var(--text);
+  font-family:'Space Grotesk',sans-serif;font-size:.88rem;
+  outline:none;resize:none;line-height:1.5;
+}
+.post-input::placeholder{color:var(--muted)}
+.post-toolbar{display:flex;gap:.5rem;margin-top:.75rem;align-items:center;flex-wrap:wrap}
+.post-tool{
+  display:flex;align-items:center;gap:.3rem;
+  font-size:.72rem;color:var(--muted);
+  padding:.35rem .7rem;border-radius:6px;
+  background:var(--surface);border:1px solid var(--border);
+  cursor:pointer;transition:all .15s;
+}
+.post-tool:hover{color:var(--accent);border-color:rgba(0,229,255,.2)}
+.post-send{
+  margin-left:auto;padding:.4rem 1.1rem;border-radius:6px;border:none;
+  background:var(--accent);color:#000;font-weight:700;font-size:.78rem;
+  cursor:pointer;transition:all .2s;
+}
+.post-send:hover{background:#00c8e0}
+
+/* CARDS SECTION */
+.section-title{
+  font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:1px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1rem;
+}
+.section-link{font-family:'Space Grotesk',sans-serif;font-size:.72rem;color:var(--accent);cursor:pointer;font-weight:500}
+
+/* POST CARD */
+.post-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:1.1rem;margin-bottom:.75rem;transition:border-color .2s;
+  animation:fadeUp .4s ease both;
+}
+.post-card:hover{border-color:#252530}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.pc-header{display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem}
+.pc-avatar{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:.95rem;
+}
+.pc-info{flex:1;min-width:0}
+.pc-name{font-size:.85rem;font-weight:600}
+.pc-meta{font-size:.7rem;color:var(--muted);margin-top:1px}
+.pc-time{font-size:.7rem;color:var(--muted)}
+.pc-text{font-size:.86rem;color:rgba(240,240,245,.7);line-height:1.6;margin-bottom:.9rem}
+.pc-tag{color:var(--accent);cursor:pointer}
+.pc-actions{display:flex;gap:1.25rem;padding-top:.75rem;border-top:1px solid var(--border)}
+.pc-btn{
+  display:flex;align-items:center;gap:.35rem;
+  font-size:.76rem;color:var(--muted);cursor:pointer;
+  background:none;border:none;transition:color .15s;
+}
+.pc-btn:hover{color:var(--text)}
+.pc-btn.liked{color:var(--accent2)}
+
+/* TRACK PLAYER */
+.track-box{
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:.9rem;display:flex;gap:.85rem;align-items:center;margin-bottom:.9rem;
+}
+.track-cover{
+  width:48px;height:48px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,#1a0a2e,#0a1a2e);
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+}
+.track-info{flex:1;min-width:0}
+.track-title{font-size:.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track-artist{font-size:.72rem;color:var(--muted);margin-top:2px}
+.waveform{width:100%;height:24px;display:flex;align-items:center;gap:1.5px;margin-top:.45rem;cursor:pointer}
+.wb{flex:1;background:var(--border);border-radius:2px;transition:background .1s}
+.wb.p{background:var(--accent)}
+.play-btn{
+  width:34px;height:34px;border-radius:50%;border:none;
+  background:var(--accent);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:transform .15s;
+}
+.play-btn:hover{transform:scale(1.08)}
+
+/* EMPTY STATE */
+.empty{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:2rem;text-align:center;color:var(--muted);
+}
+.empty-icon{font-size:2rem;margin-bottom:.5rem}
+.empty-text{font-size:.85rem}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:.75rem 1.25rem;font-size:.82rem;
+  display:none;align-items:center;gap:.6rem;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  animation:slideUp .3s ease;
+}
+.toast.show{display:flex}
+.toast.success{border-color:rgba(0,229,255,.2);color:var(--accent)}
+@keyframes slideUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Loading screen */
+#loading{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;
+  z-index:9999;
+}
+.loading-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:4px;color:var(--accent)}
+.loading-bar{width:120px;height:2px;background:var(--border);border-radius:1px;overflow:hidden}
+.loading-fill{width:0%;height:100%;background:var(--accent);animation:load 1.2s ease forwards}
+@keyframes load{to{width:100%}}
+
+@media(max-width:800px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .quick-actions{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading">
+  <div class="loading-logo">⬡ TALENTOURBANO</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html">
+    <span class="logo-dot"></span>TALENTOURBANO
+  </a>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" id="navAvatar">?</div>
+      <span id="navName">Cargando...</span>
+    </div>
+    <button class="btn-logout" onclick="logout()">Salir</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="profile-card">
+      <div class="profile-avatar" id="profAvatar">?</div>
+      <div class="profile-name" id="profName">—</div>
+      <div class="profile-genre" id="profGenre">—</div>
+      <div class="profile-city" id="profCity">—</div>
+      <div class="profile-plan plan-free" id="profPlan">● PLAN GRATUITO</div>
+      <div class="profile-stats">
+        <div class="pstat"><div class="pstat-n">0</div><div class="pstat-l">Seguidores</div></div>
+        <div class="pstat"><div class="pstat-n">0</div><div class="pstat-l">Siguiendo</div></div>
+        <div class="pstat"><div class="pstat-n">0</div><div class="pstat-l">Posts</div></div>
+        <div class="pstat"><div class="pstat-n">0</div><div class="pstat-l">Tracks</div></div>
+      </div>
+    </div>
+
+    <div class="side-menu">
+      <a href="#" class="menu-item active">
+        <span class="menu-icon">🏠</span> Inicio
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-icon">🔍</span> Explorar
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-icon">🔔</span> Notificaciones
+        <span class="menu-badge">3</span>
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-icon">💬</span> Mensajes
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-icon">🎵</span> Mi Música
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-icon">🤝</span> Colaborar
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-icon">📅</span> Eventos
+      </a>
+      <a href="#" class="menu-item">
+        <span class="menu-icon">⚙️</span> Ajustes
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- WELCOME -->
+    <div class="welcome-banner">
+      <div>
+        <div class="wb-title">¡BIENVENIDO/A, <span id="wbName">ARTISTA</span>! 🎤</div>
+        <div class="wb-sub">Tu perfil está listo. Comparte tu música y conecta con otros artistas.</div>
+      </div>
+      <button class="wb-btn" onclick="showToast('¡Función próximamente disponible! 🚀')">Subir track</button>
+    </div>
+
+    <!-- ACCIONES RÁPIDAS -->
+    <div class="quick-actions">
+      <div class="qa" onclick="showToast('¡Función próximamente! 🎵')">
+        <div class="qa-icon">🎵</div>
+        <div class="qa-label">Subir música</div>
+      </div>
+      <div class="qa" onclick="showToast('¡Función próximamente! 🤝')">
+        <div class="qa-icon">🤝</div>
+        <div class="qa-label">Buscar colabo</div>
+      </div>
+      <div class="qa" onclick="showToast('¡Función próximamente! 📅')">
+        <div class="qa-icon">📅</div>
+        <div class="qa-label">Crear evento</div>
+      </div>
+      <div class="qa" onclick="showToast('¡Función próximamente! 📊')">
+        <div class="qa-icon">📊</div>
+        <div class="qa-label">Mis estadísticas</div>
+      </div>
+    </div>
+
+    <!-- CREAR POST -->
+    <div class="post-create">
+      <div class="post-avatar" id="postAvatar">?</div>
+      <div class="post-input-wrap">
+        <textarea class="post-input" id="postText" rows="2" placeholder="¿Qué estás creando hoy? Comparte un track, una idea, busca colabo..."></textarea>
+        <div class="post-toolbar">
+          <div class="post-tool" onclick="showToast('Adjunta tu música 🎵')">🎵 Música</div>
+          <div class="post-tool" onclick="showToast('Añade una imagen 🖼️')">🖼️ Imagen</div>
+          <div class="post-tool" onclick="showToast('Crea un evento 📅')">📅 Evento</div>
+          <button class="post-send" onclick="sendPost()">Publicar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEED -->
+    <div>
+      <div class="section-title">
+        Últimas publicaciones
+        <span class="section-link" onclick="showToast('Cargando más posts...')">Ver todos</span>
+      </div>
+
+      <!-- Post 1 -->
+      <div class="post-card">
+        <div class="pc-header">
+          <div class="pc-avatar" style="background:linear-gradient(135deg,#1a0a2e,#2e0a1a)">MK</div>
+          <div class="pc-info">
+            <div class="pc-name">Mikael Keys</div>
+            <div class="pc-meta">📍 Madrid · Trap / R&B</div>
+          </div>
+          <span class="pc-time">hace 20 min</span>
+        </div>
+        <div class="track-box">
+          <div class="track-cover">🎵</div>
+          <div class="track-info">
+            <div class="track-title">Noche Sin Fin</div>
+            <div class="track-artist">Mikael Keys · 3:42</div>
+            <div class="waveform" id="wf1"></div>
+          </div>
+          <button class="play-btn" onclick="togglePlay(this)">
+            <svg width="12" height="12" fill="#000" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+        <p class="pc-text">Nuevo single ya disponible 🔥 3 meses en el estudio para esto. <span class="pc-tag">#trap</span> <span class="pc-tag">#nuevamusica</span></p>
+        <div class="pc-actions">
+          <button class="pc-btn" onclick="this.classList.toggle('liked')">❤️ 2.1K</button>
+          <button class="pc-btn">💬 87</button>
+          <button class="pc-btn">↗️ Compartir</button>
+        </div>
+      </div>
+
+      <!-- Post 2 -->
+      <div class="post-card" style="animation-delay:.08s">
+        <div class="pc-header">
+          <div class="pc-avatar" style="background:linear-gradient(135deg,#0a1a2e,#1a2e0a)">AV</div>
+          <div class="pc-info">
+            <div class="pc-name">Ana Vidal</div>
+            <div class="pc-meta">📍 Barcelona · Dream Pop</div>
+          </div>
+          <span class="pc-time">hace 1h</span>
+        </div>
+        <p class="pc-text">Buscando productor para mi EP 🎹 ¿Alguien trabaja Dream Pop con toques electrónicos? DM abierto. <span class="pc-tag">#colaboracion</span> <span class="pc-tag">#productor</span></p>
+        <div style="background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.1);border-radius:8px;padding:.7rem 1rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.7rem">
+          <span style="font-size:1.1rem">🤝</span>
+          <div>
+            <div style="font-size:.8rem;font-weight:600;color:var(--accent)">Busca colaboración</div>
+            <div style="font-size:.7rem;color:var(--muted)">Productor · EP · Dream Pop · Barcelona o remoto</div>
+          </div>
+          <button onclick="showToast('¡Contacto próximamente! 💬')" style="margin-left:auto;font-size:.72rem;font-weight:700;padding:.3rem .8rem;border-radius:20px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer">Contactar</button>
+        </div>
+        <div class="pc-actions">
+          <button class="pc-btn" onclick="this.classList.toggle('liked')">❤️ 342</button>
+          <button class="pc-btn">💬 54</button>
+          <button class="pc-btn">↗️ Compartir</button>
+        </div>
+      </div>
+
+      <!-- Post 3 -->
+      <div class="post-card" style="animation-delay:.16s">
+        <div class="pc-header">
+          <div class="pc-avatar" style="background:linear-gradient(135deg,#2e1a0a,#0a0a2e)">DJ</div>
+          <div class="pc-info">
+            <div class="pc-name">DJ Nomad</div>
+            <div class="pc-meta">📍 Valencia · Electronic</div>
+          </div>
+          <span class="pc-time">hace 3h</span>
+        </div>
+        <p class="pc-text">Esta noche en Sala Planta Baja 🔊 Set con tracks inéditos. 23h, entradas en puerta. <span class="pc-tag">#directo</span> <span class="pc-tag">#Valencia</span></p>
+        <div class="pc-actions">
+          <button class="pc-btn" onclick="this.classList.toggle('liked')">❤️ 1.7K</button>
+          <button class="pc-btn">💬 203</button>
+          <button class="pc-btn" style="color:var(--accent2)">📅 Me apunto</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient(
+  'https://hwgwacbmxipzldxusqpb.supabase.co',
+  'sb_publishable_YqjmVj7azpmy7JLPABe3FQ_Eb7HUNkS'
+);
+
+let userData = null;
+
+// ── INIT ──
+async function init() {
+  const { data:{ session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = 'register.html'; return; }
+
+  // Cargar datos del usuario
+  try {
+    const { data } = await sb.from('tu_usuarios')
+      .select('*').eq('id', session.user.id).single();
+    userData = data || { nombre: session.user.email.split('@')[0], email: session.user.email, plan:'gratuito', genero_musical:'', ciudad:'' };
+  } catch(e) {
+    userData = { nombre: session.user.email.split('@')[0], email: session.user.email, plan:'gratuito', genero_musical:'', ciudad:'' };
+  }
+
+  renderProfile();
+  buildWaveform('wf1');
+  document.getElementById('loading').style.display = 'none';
+}
+
+function renderProfile() {
+  const ini = (userData.nombre||'?').charAt(0).toUpperCase();
+  document.getElementById('navAvatar').textContent = ini;
+  document.getElementById('navName').textContent = userData.nombre || 'Artista';
+  document.getElementById('profAvatar').textContent = ini;
+  document.getElementById('postAvatar').textContent = ini;
+  document.getElementById('profName').textContent = userData.nombre || '—';
+  document.getElementById('profGenre').textContent = userData.genero_musical || 'Sin género';
+  document.getElementById('profCity').textContent = userData.ciudad ? '📍 ' + userData.ciudad : '📍 Sin ciudad';
+  document.getElementById('wbName').textContent = (userData.nombre||'ARTISTA').toUpperCase();
+  const planEl = document.getElementById('profPlan');
+  if (userData.plan === 'premium') {
+    planEl.textContent = '★ PLAN PREMIUM';
+    planEl.className = 'profile-plan plan-premium';
+  }
+}
+
+// ── WAVEFORM ──
+function buildWaveform(id) {
+  const wf = document.getElementById(id);
+  if (!wf) return;
+  const n = 38, played = 0.35;
+  for (let i=0;i<n;i++) {
+    const b = document.createElement('div');
+    b.className = 'wb' + (i < n*played ? ' p':'');
+    b.style.height = (4+Math.random()*18)+'px';
+    wf.appendChild(b);
+  }
+}
+
+// ── PLAY ──
+function togglePlay(btn) {
+  const playing = btn.dataset.p === '1';
+  btn.dataset.p = playing ? '0':'1';
+  btn.innerHTML = playing
+    ? '<svg width="12" height="12" fill="#000" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
+    : '<svg width="12" height="12" fill="#000" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+}
+
+// ── POST ──
+function sendPost() {
+  const txt = document.getElementById('postText').value.trim();
+  if (!txt) { showToast('⚠️ Escribe algo primero'); return; }
+  document.getElementById('postText').value = '';
+  showToast('✅ ¡Post publicado!');
+}
+
+// ── LOGOUT ──
+async function logout() {
+  await sb.auth.signOut();
+  window.location.href = 'register.html';
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show','success');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show','success'), 2800);
+}
+
+init();
+</script>
+</body>
+</html>
