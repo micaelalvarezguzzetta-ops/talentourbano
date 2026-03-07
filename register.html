@@ -429,7 +429,7 @@ const SUPABASE_KEY = 'sb_publishable_YqjmVj7azpmy7JLPABe3FQ_Eb7HUNkS';
 const LIMITE_GRATIS = 50;
 const PRECIO_MENSUAL = 4.99;
 // Cuando tengas el Price ID de Stripe para este proyecto, ponlo aquí:
-const STRIPE_PRICE_ID = 'PENDIENTE_STRIPE_PRICE_ID';
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/14A9AU6DRbyj3AZ7NL0x20f';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -497,16 +497,13 @@ async function handleRegister() {
   if (password.length < 8) return showError('La contraseña debe tener al menos 8 caracteres.');
   if (!email.includes('@')) return showError('El email no es válido.');
 
-  // Si es de pago, redirigir a Stripe primero
+  // Si es de pago, guardar datos y redirigir a Stripe
   if (esPago) {
-    if (STRIPE_PRICE_ID === 'PENDIENTE_STRIPE_PRICE_ID') {
-      showError('⚠️ Los pagos estarán disponibles muy pronto. ¡Vuelve en breve!');
-      return;
-    }
-    // Aquí iría la integración con Stripe Checkout
-    // Por ahora guardamos los datos en sessionStorage y redirigimos
+    // Guardamos los datos para completar el registro tras el pago
     sessionStorage.setItem('pending_register', JSON.stringify({ nombre, ciudad, email, password, genero }));
-    window.location.href = `/checkout.html?price=${STRIPE_PRICE_ID}`;
+    // Añadimos el email como prefill en el link de Stripe
+    const stripeUrl = `${STRIPE_PAYMENT_LINK}?prefilled_email=${encodeURIComponent(email)}`;
+    window.location.href = stripeUrl;
     return;
   }
 
