@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TALENTOURBANO — Únete</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#050505;
+    --surface:#0f0f0f;
+    --card:#161616;
+    --border:#242424;
+    --accent:#00e5ff;
+    --accent2:#ff3366;
+    --text:#f0f0f0;
+    --muted:#666;
+  }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    min-height:100vh;
+    display:flex;
+    overflow:hidden;
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:3rem;
+  }
+  .left-bg{
+    position:absolute;inset:0;
+    background:
+      linear-gradient(to bottom, rgba(0,0,0,.3) 0%, rgba(0,0,0,.85) 100%),
+      url('https://images.unsplash.com/photo-1540039155733-5bb30b4aae4e?w=1200&q=80') center/cover;
+  }
+  .left-content{position:relative;z-index:2}
+  .left-logo{
+    position:absolute;top:2.5rem;left:3rem;
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.5rem;letter-spacing:3px;
+    display:flex;align-items:center;gap:.5rem;
+  }
+  .logo-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 8px var(--accent);
+  }
+  .left-title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:4rem;line-height:.95;
+    letter-spacing:2px;margin-bottom:1rem;
+  }
+  .left-title em{font-style:normal;color:var(--accent)}
+  .left-sub{
+    font-size:.9rem;color:rgba(255,255,255,.5);
+    line-height:1.6;max-width:340px;margin-bottom:2rem;
+  }
+  .left-stats{display:flex;gap:2rem}
+  .stat{text-align:center}
+  .stat-num{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:2rem;color:var(--accent);
+  }
+  .stat-label{font-size:.7rem;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase}
+
+  /* ── RIGHT PANEL ── */
+  .right-panel{
+    width:480px;
+    background:var(--surface);
+    border-left:1px solid var(--border);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:3rem 2.5rem;
+    overflow-y:auto;
+  }
+
+  /* ── TABS ── */
+  .auth-tabs{
+    display:flex;gap:0;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    overflow:hidden;
+    margin-bottom:2rem;
+  }
+  .auth-tab{
+    flex:1;padding:.7rem;
+    font-size:.82rem;font-weight:600;
+    letter-spacing:.08em;text-transform:uppercase;
+    cursor:pointer;border:none;background:transparent;
+    color:var(--muted);transition:all .2s;
+  }
+  .auth-tab.active{background:var(--accent);color:#000}
+
+  /* ── FORM ── */
+  .form-title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:2rem;letter-spacing:1px;
+    margin-bottom:.4rem;
+  }
+  .form-sub{font-size:.82rem;color:var(--muted);margin-bottom:1.75rem;line-height:1.5}
+
+  .form-group{margin-bottom:1.1rem}
+  .form-label{
+    display:block;font-size:.72rem;font-weight:600;
+    letter-spacing:.1em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:.4rem;
+  }
+  .form-input{
+    width:100%;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:.75rem 1rem;
+    color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:.88rem;
+    outline:none;
+    transition:border-color .2s;
+  }
+  .form-input:focus{border-color:var(--accent)}
+  .form-input::placeholder{color:#333}
+
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+
+  select.form-input{cursor:pointer;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 1rem center;
+    padding-right:2.5rem;
+  }
+  select.form-input option{background:#1a1a1a}
+
+  /* ── PLAN BADGE ── */
+  .plan-banner{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:1rem 1.1rem;
+    margin-bottom:1.5rem;
+    display:flex;align-items:center;gap:.85rem;
+  }
+  .plan-icon{font-size:1.3rem}
+  .plan-info{flex:1}
+  .plan-title{font-size:.85rem;font-weight:700}
+  .plan-desc{font-size:.75rem;color:var(--muted);margin-top:2px}
+  .plan-badge{
+    font-size:.68rem;font-weight:700;
+    padding:.3rem .7rem;border-radius:20px;
+    letter-spacing:.05em;
+  }
+  .badge-free{background:rgba(0,229,255,.12);color:var(--accent);border:1px solid rgba(0,229,255,.25)}
+  .badge-pay{background:rgba(255,51,102,.12);color:var(--accent2);border:1px solid rgba(255,51,102,.25)}
+
+  /* ── SUBMIT BTN ── */
+  .btn-submit{
+    width:100%;padding:.9rem;
+    border-radius:8px;border:none;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:.88rem;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;
+    cursor:pointer;transition:all .25s;
+    margin-top:.5rem;
+  }
+  .btn-free{background:var(--accent);color:#000}
+  .btn-free:hover{background:#00c8e0;transform:translateY(-1px)}
+  .btn-pay{background:var(--accent2);color:#fff}
+  .btn-pay:hover{background:#ff1a4d;transform:translateY(-1px)}
+  .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  /* ── DIVIDER ── */
+  .divider{
+    display:flex;align-items:center;gap:.75rem;
+    margin:1.25rem 0;
+  }
+  .divider-line{flex:1;height:1px;background:var(--border)}
+  .divider-text{font-size:.72rem;color:var(--muted)}
+
+  /* ── SOCIAL BTNS ── */
+  .btn-social{
+    width:100%;padding:.75rem;
+    border-radius:8px;
+    border:1px solid var(--border);
+    background:transparent;color:var(--text);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:.82rem;font-weight:500;
+    cursor:pointer;transition:all .2s;
+    display:flex;align-items:center;justify-content:center;gap:.6rem;
+  }
+  .btn-social:hover{background:var(--card);border-color:#444}
+
+  /* ── MESSAGES ── */
+  .msg{
+    padding:.75rem 1rem;border-radius:8px;
+    font-size:.82rem;margin-bottom:1rem;
+    display:none;
+  }
+  .msg.error{background:rgba(255,51,102,.1);border:1px solid rgba(255,51,102,.3);color:#ff6688}
+  .msg.success{background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);color:var(--accent)}
+  .msg.show{display:block}
+
+  /* ── LOADING ── */
+  .spinner{
+    display:inline-block;width:16px;height:16px;
+    border:2px solid rgba(0,0,0,.3);
+    border-top-color:#000;
+    border-radius:50%;
+    animation:spin .6s linear infinite;
+    vertical-align:middle;margin-right:.4rem;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ── FORGOT / LINKS ── */
+  .form-link{
+    font-size:.78rem;color:var(--muted);
+    text-align:center;margin-top:1.25rem;
+  }
+  .form-link a{color:var(--accent);cursor:pointer;text-decoration:none}
+  .form-link a:hover{text-decoration:underline}
+
+  /* ── SUCCESS SCREEN ── */
+  #successScreen{
+    display:none;text-align:center;
+  }
+  .success-icon{font-size:3.5rem;margin-bottom:1rem}
+  .success-title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:2.2rem;letter-spacing:1px;margin-bottom:.5rem;
+  }
+  .success-sub{font-size:.88rem;color:var(--muted);line-height:1.6;margin-bottom:1.5rem}
+  .btn-go{
+    display:inline-block;
+    padding:.8rem 2rem;
+    background:var(--accent);color:#000;
+    border-radius:8px;font-weight:700;
+    font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;
+    text-decoration:none;transition:background .2s;
+  }
+  .btn-go:hover{background:#00c8e0}
+
+  /* ── COUNTER BAR ── */
+  .counter-wrap{margin-bottom:1.5rem}
+  .counter-label{
+    display:flex;justify-content:space-between;
+    font-size:.72rem;color:var(--muted);margin-bottom:.4rem;
+  }
+  .counter-label span:last-child{color:var(--accent)}
+  .counter-bar{
+    height:4px;background:var(--border);border-radius:2px;overflow:hidden;
+  }
+  .counter-fill{
+    height:100%;background:var(--accent);
+    border-radius:2px;transition:width .5s ease;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:768px){
+    .left-panel{display:none}
+    .right-panel{width:100%;border:none}
+    body{display:block}
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT -->
+<div class="left-panel">
+  <div class="left-bg"></div>
+  <a class="left-logo" href="index.html">
+    <span class="logo-dot"></span>
+    TALENTOURBANO
+  </a>
+  <div class="left-content">
+    <h1 class="left-title">TU MÚSICA<br><em>AL MUNDO</em></h1>
+    <p class="left-sub">La red exclusiva para artistas urbanos emergentes. Comparte tu música, conecta y crece.</p>
+    <div class="left-stats">
+      <div class="stat">
+        <div class="stat-num" id="statUsuarios">—</div>
+        <div class="stat-label">Artistas</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">89K</div>
+        <div class="stat-label">Tracks</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3.2M</div>
+        <div class="stat-label">Plays</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right-panel">
+
+  <!-- TABS -->
+  <div class="auth-tabs">
+    <button class="auth-tab active" id="tabRegister" onclick="switchTab('register')">Registro</button>
+    <button class="auth-tab" id="tabLogin" onclick="switchTab('login')">Iniciar sesión</button>
+  </div>
+
+  <!-- MENSAJES -->
+  <div class="msg error" id="msgError"></div>
+  <div class="msg success" id="msgSuccess"></div>
+
+  <!-- ══ REGISTRO ══ -->
+  <div id="registerForm">
+    <h2 class="form-title">Únete ahora</h2>
+    <p class="form-sub" id="registerSubtitle">Crea tu perfil de artista gratis</p>
+
+    <!-- Barra de plazas -->
+    <div class="counter-wrap" id="counterWrap">
+      <div class="counter-label">
+        <span>Plazas gratuitas ocupadas</span>
+        <span id="counterText">Cargando...</span>
+      </div>
+      <div class="counter-bar">
+        <div class="counter-fill" id="counterFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Banner de plan -->
+    <div class="plan-banner" id="planBanner">
+      <div class="plan-icon" id="planIcon">🎵</div>
+      <div class="plan-info">
+        <div class="plan-title" id="planTitle">Registro gratuito</div>
+        <div class="plan-desc" id="planDesc">Estás entre los primeros 50 artistas — ¡sin coste!</div>
+      </div>
+      <span class="plan-badge badge-free" id="planBadge">GRATIS</span>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nombre artístico</label>
+        <input class="form-input" type="text" id="regNombre" placeholder="Tu nombre"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ciudad</label>
+        <input class="form-input" type="text" id="regCiudad" placeholder="Madrid"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" type="email" id="regEmail" placeholder="tu@email.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <input class="form-input" type="password" id="regPassword" placeholder="Mínimo 8 caracteres"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Género musical</label>
+      <select class="form-input" id="regGenero">
+        <option value="">Selecciona tu género</option>
+        <option>Trap</option>
+        <option>Reggaeton</option>
+        <option>Hip-Hop</option>
+        <option>R&B</option>
+        <option>Drill</option>
+        <option>Freestyle</option>
+        <option>Afrobeats</option>
+        <option>Electronic</option>
+        <option>Indie</option>
+        <option>Pop Urbano</option>
+        <option>Otro</option>
+      </select>
+    </div>
+
+    <button class="btn-submit btn-free" id="btnRegister" onclick="handleRegister()">
+      Crear mi perfil gratis
+    </button>
+
+    <div class="form-link">
+      ¿Ya tienes cuenta? <a onclick="switchTab('login')">Inicia sesión</a>
+    </div>
+  </div>
+
+  <!-- ══ LOGIN ══ -->
+  <div id="loginForm" style="display:none">
+    <h2 class="form-title">Bienvenido</h2>
+    <p class="form-sub">Accede a tu perfil de artista</p>
+
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" type="email" id="loginEmail" placeholder="tu@email.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <input class="form-input" type="password" id="loginPassword" placeholder="Tu contraseña"/>
+    </div>
+
+    <button class="btn-submit btn-free" id="btnLogin" onclick="handleLogin()">
+      Entrar
+    </button>
+
+    <div class="form-link" style="margin-top:.75rem">
+      <a onclick="handleForgot()">¿Olvidaste tu contraseña?</a>
+    </div>
+    <div class="form-link">
+      ¿No tienes cuenta? <a onclick="switchTab('register')">Regístrate gratis</a>
+    </div>
+  </div>
+
+  <!-- ══ ÉXITO ══ -->
+  <div id="successScreen">
+    <div class="success-icon">🎉</div>
+    <h2 class="success-title">¡Ya eres parte<br>de la familia!</h2>
+    <p class="success-sub" id="successMsg">Revisa tu email para confirmar tu cuenta. Después podrás acceder a tu perfil.</p>
+    <a href="index.html" class="btn-go">Ir a TalentoUrbano →</a>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const SUPABASE_URL = 'https://hwgwacbmxipzldxusqpb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_YqjmVj7azpmy7JLPABe3FQ_Eb7HUNkS';
+const LIMITE_GRATIS = 50;
+const PRECIO_MENSUAL = 4.99;
+// Cuando tengas el Price ID de Stripe para este proyecto, ponlo aquí:
+const STRIPE_PRICE_ID = 'PENDIENTE_STRIPE_PRICE_ID';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let totalUsuarios = 0;
+let esPago = false;
+
+// ═══════════════════════════════════════════
+// INIT — contar usuarios al cargar
+// ═══════════════════════════════════════════
+async function init() {
+  try {
+    const { count, error } = await supabase
+      .from('tu_usuarios')
+      .select('*', { count: 'exact', head: true });
+
+    if (!error) {
+      totalUsuarios = count || 0;
+      actualizarUI();
+    }
+  } catch(e) {
+    console.log('Error contando usuarios:', e);
+  }
+}
+
+function actualizarUI() {
+  // Stat en panel izquierdo
+  const statEl = document.getElementById('statUsuarios');
+  if (statEl) statEl.textContent = totalUsuarios;
+
+  // Barra de progreso
+  const pct = Math.min((totalUsuarios / LIMITE_GRATIS) * 100, 100);
+  document.getElementById('counterFill').style.width = pct + '%';
+  document.getElementById('counterText').textContent = `${totalUsuarios} / ${LIMITE_GRATIS}`;
+
+  // Determinar si es de pago
+  esPago = totalUsuarios >= LIMITE_GRATIS;
+
+  if (esPago) {
+    // Modo pago
+    document.getElementById('planIcon').textContent = '💳';
+    document.getElementById('planTitle').textContent = 'Suscripción mensual';
+    document.getElementById('planDesc').textContent = `Las plazas gratuitas están agotadas. Acceso por ${PRECIO_MENSUAL}€/mes.`;
+    document.getElementById('planBadge').textContent = `${PRECIO_MENSUAL}€/MES`;
+    document.getElementById('planBadge').className = 'plan-badge badge-pay';
+    document.getElementById('registerSubtitle').textContent = `Plazas gratuitas agotadas · ${PRECIO_MENSUAL}€/mes`;
+
+    const btn = document.getElementById('btnRegister');
+    btn.textContent = `Continuar al pago · ${PRECIO_MENSUAL}€/mes`;
+    btn.className = 'btn-submit btn-pay';
+  }
+}
+
+// ═══════════════════════════════════════════
+// REGISTRO
+// ═══════════════════════════════════════════
+async function handleRegister() {
+  const nombre = document.getElementById('regNombre').value.trim();
+  const ciudad = document.getElementById('regCiudad').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const genero = document.getElementById('regGenero').value;
+
+  // Validaciones
+  if (!nombre || !email || !password) return showError('Por favor rellena todos los campos obligatorios.');
+  if (password.length < 8) return showError('La contraseña debe tener al menos 8 caracteres.');
+  if (!email.includes('@')) return showError('El email no es válido.');
+
+  // Si es de pago, redirigir a Stripe primero
+  if (esPago) {
+    if (STRIPE_PRICE_ID === 'PENDIENTE_STRIPE_PRICE_ID') {
+      showError('⚠️ Los pagos estarán disponibles muy pronto. ¡Vuelve en breve!');
+      return;
+    }
+    // Aquí iría la integración con Stripe Checkout
+    // Por ahora guardamos los datos en sessionStorage y redirigimos
+    sessionStorage.setItem('pending_register', JSON.stringify({ nombre, ciudad, email, password, genero }));
+    window.location.href = `/checkout.html?price=${STRIPE_PRICE_ID}`;
+    return;
+  }
+
+  setLoading('btnRegister', true);
+  clearMessages();
+
+  try {
+    // 1. Crear usuario en Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { nombre, ciudad, genero_musical: genero }
+      }
+    });
+
+    if (authError) throw authError;
+
+    // 2. Insertar en tu_usuarios
+    if (authData.user) {
+      const { error: dbError } = await supabase.from('tu_usuarios').insert({
+        id: authData.user.id,
+        email,
+        nombre,
+        ciudad,
+        genero_musical: genero,
+        plan: 'gratuito'
+      });
+      // Si ya existe (confirmación pendiente), no es error grave
+    }
+
+    // 3. Mostrar éxito
+    setLoading('btnRegister', false);
+    mostrarExito('gratuito', nombre);
+
+  } catch(err) {
+    setLoading('btnRegister', false);
+    let msg = err.message || 'Ha ocurrido un error. Inténtalo de nuevo.';
+    if (msg.includes('already registered') || msg.includes('already been registered')) {
+      msg = 'Este email ya está registrado. ¿Quieres iniciar sesión?';
+    }
+    if (msg.includes('Password should be')) {
+      msg = 'La contraseña debe tener al menos 8 caracteres.';
+    }
+    showError(msg);
+  }
+}
+
+// ═══════════════════════════════════════════
+// LOGIN
+// ═══════════════════════════════════════════
+async function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  if (!email || !password) return showError('Introduce tu email y contraseña.');
+
+  setLoading('btnLogin', true);
+  clearMessages();
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+
+    // Actualizar último acceso
+    await supabase.from('tu_usuarios')
+      .update({ ultimo_acceso: new Date().toISOString() })
+      .eq('id', data.user.id);
+
+    // Verificar si es admin
+    const { data: userData } = await supabase.from('tu_usuarios')
+      .select('es_admin, nombre')
+      .eq('id', data.user.id)
+      .single();
+
+    setLoading('btnLogin', false);
+
+    if (userData?.es_admin) {
+      window.location.href = 'admin.html';
+    } else {
+      window.location.href = 'dashboard.html';
+    }
+
+  } catch(err) {
+    setLoading('btnLogin', false);
+    let msg = err.message || 'Error al iniciar sesión.';
+    if (msg.includes('Invalid login credentials')) msg = 'Email o contraseña incorrectos.';
+    if (msg.includes('Email not confirmed')) msg = 'Confirma tu email antes de entrar. Revisa tu bandeja de entrada.';
+    showError(msg);
+  }
+}
+
+// ═══════════════════════════════════════════
+// OLVIDÉ CONTRASEÑA
+// ═══════════════════════════════════════════
+async function handleForgot() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) return showError('Introduce tu email primero.');
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/reset-password.html'
+  });
+
+  if (error) showError('Error enviando el email. Inténtalo de nuevo.');
+  else showSuccess('✉️ Te hemos enviado un email para restablecer tu contraseña.');
+}
+
+// ═══════════════════════════════════════════
+// ÉXITO
+// ═══════════════════════════════════════════
+function mostrarExito(tipo, nombre) {
+  document.getElementById('registerForm').style.display = 'none';
+  document.getElementById('loginForm').style.display = 'none';
+  document.querySelector('.auth-tabs').style.display = 'none';
+
+  const screen = document.getElementById('successScreen');
+  screen.style.display = 'block';
+
+  if (tipo === 'gratuito') {
+    document.getElementById('successMsg').textContent =
+      `¡Bienvenido/a ${nombre}! Revisa tu email para confirmar tu cuenta. Una vez confirmada podrás acceder a tu perfil.`;
+  }
+}
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function switchTab(tab) {
+  clearMessages();
+  if (tab === 'register') {
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('tabRegister').classList.add('active');
+    document.getElementById('tabLogin').classList.remove('active');
+  } else {
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('tabLogin').classList.add('active');
+    document.getElementById('tabRegister').classList.remove('active');
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('msgError');
+  el.textContent = '⚠️ ' + msg;
+  el.classList.add('show');
+  document.getElementById('msgSuccess').classList.remove('show');
+}
+
+function showSuccess(msg) {
+  const el = document.getElementById('msgSuccess');
+  el.textContent = msg;
+  el.classList.add('show');
+  document.getElementById('msgError').classList.remove('show');
+}
+
+function clearMessages() {
+  document.getElementById('msgError').classList.remove('show');
+  document.getElementById('msgSuccess').classList.remove('show');
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (loading) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Procesando...';
+  } else {
+    btn.disabled = false;
+    if (btnId === 'btnRegister') {
+      btn.innerHTML = esPago ? `Continuar al pago · ${PRECIO_MENSUAL}€/mes` : 'Crear mi perfil gratis';
+    } else {
+      btn.innerHTML = 'Entrar';
+    }
+  }
+}
+
+// Enter para enviar
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('registerForm').style.display !== 'none') handleRegister();
+    else handleLogin();
+  }
+});
+
+// Arrancar
+init();
+</script>
+</body>
+</html>
