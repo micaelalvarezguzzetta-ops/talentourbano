@@ -625,7 +625,7 @@
     <p class="hero-sub">La red donde el talento urbano brilla</p>
     <div class="hero-btns">
       <a href="#feed" class="btn-pill btn-white">Explorar artistas</a>
-      <a href="#join" class="btn-pill btn-dark">Unirme ahora</a>
+      <a href="register.html" class="btn-pill btn-dark">Unirme ahora</a>
     </div>
   </div>
 </section>
@@ -984,7 +984,7 @@
         <div class="fa-genre">Reggaeton <span>/</span> Trap</div>
       </div>
       <div>
-        <a href="#" class="btn-pill btn-white" style="font-size:.9rem">Crear mi perfil gratis →</a>
+        <a href="register.html" class="btn-pill btn-white" style="font-size:.9rem">Crear mi perfil gratis →</a>
       </div>
     </div>
   </div>
@@ -1031,7 +1031,7 @@
         <span class="fc-icon">✉</span>
         <div>
           <div class="fc-label">Email</div>
-          <div class="fc-val">info@talentourbano.com</div>
+          <div class="fc-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="87eee9e1e8c7f3e6ebe2e9f3e8f2f5e5e6e9e8a9e4e8ea">[email&#160;protected]</a></div>
         </div>
       </div>
       <div class="footer-contact-item">
@@ -1064,7 +1064,7 @@
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── Nav scroll ──
   window.addEventListener('scroll', () => {
     document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
@@ -1134,13 +1134,4 @@
 
   // ── Newsletter ──
   document.querySelector('.newsletter-btn').addEventListener('click', function() {
-    const input = document.querySelector('.newsletter-input');
-    if (input.value.includes('@')) {
-      this.textContent = '✓ Suscrito';
-      this.style.background = '#00c851';
-      input.value = '';
-    }
-  });
-</script>
-</body>
-</html>
+    const i
