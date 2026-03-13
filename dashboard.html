@@ -473,9 +473,36 @@ async function init() {
   if (!session) { window.location.href = 'register.html'; return; }
 
   try {
-    const { data } = await sb.from('tu_usuarios').select('*').eq('id', session.user.id).single();
-    ME = data || fallback(session);
-  } catch(e) { ME = fallback(session); }
+    const { data, error } = await sb.from('tu_usuarios').select('*').eq('id', session.user.id).single();
+    if (data) {
+      ME = data;
+    } else {
+      // Usuario no existe en tu_usuarios — crearlo ahora
+      const nuevo = {
+        id: session.user.id,
+        email: session.user.email,
+        nombre: session.user.user_metadata?.nombre || session.user.email.split('@')[0],
+        tipo_cuenta: session.user.user_metadata?.tipo_cuenta || 'artista',
+        genero_musical: session.user.user_metadata?.genero_musical || '',
+        ciudad: session.user.user_metadata?.ciudad || '',
+        plan: 'gratuito',
+        avatar_url: null
+      };
+      const { data: created } = await sb.from('tu_usuarios').insert(nuevo).select().single();
+      ME = created || nuevo;
+    }
+  } catch(e) {
+    // Intentar crear de todas formas
+    const nuevo = {
+      id: session.user.id,
+      email: session.user.email,
+      nombre: session.user.email.split('@')[0],
+      tipo_cuenta: 'artista',
+      plan: 'gratuito'
+    };
+    try { await sb.from('tu_usuarios').insert(nuevo); } catch(e2){}
+    ME = nuevo;
+  }
 
   renderProfile();
   await loadPosts();
