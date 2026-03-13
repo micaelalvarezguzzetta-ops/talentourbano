@@ -598,46 +598,55 @@ const COLORS = ['linear-gradient(135deg,#1a0a2e,#2e0a1a)','linear-gradient(135de
 
 // ══ INIT ══
 async function init() {
-  const { data:{ session } } = await sb.auth.getSession();
-  if (!session) { window.location.href = 'register.html'; return; }
+  // Timeout de seguridad: si algo falla, ocultar loader igualmente
+  const loaderTimeout = setTimeout(()=>{
+    document.getElementById('loader').style.display='none';
+  }, 6000);
 
   try {
-    const { data, error } = await sb.from('tu_usuarios').select('*').eq('id', session.user.id).single();
-    if (data) {
-      ME = data;
-    } else {
-      // Usuario no existe en tu_usuarios — crearlo ahora
+    const { data:{ session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = 'register.html'; return; }
+
+    try {
+      const { data, error } = await sb.from('tu_usuarios').select('*').eq('id', session.user.id).single();
+      if (data) {
+        ME = data;
+      } else {
+        const nuevo = {
+          id: session.user.id,
+          email: session.user.email,
+          nombre: session.user.user_metadata?.nombre || session.user.email.split('@')[0],
+          tipo_cuenta: session.user.user_metadata?.tipo_cuenta || 'artista',
+          genero_musical: session.user.user_metadata?.genero_musical || '',
+          ciudad: session.user.user_metadata?.ciudad || '',
+          plan: 'gratuito',
+          avatar_url: null
+        };
+        const { data: created } = await sb.from('tu_usuarios').insert(nuevo).select().single();
+        ME = created || nuevo;
+      }
+    } catch(e) {
       const nuevo = {
         id: session.user.id,
         email: session.user.email,
-        nombre: session.user.user_metadata?.nombre || session.user.email.split('@')[0],
-        tipo_cuenta: session.user.user_metadata?.tipo_cuenta || 'artista',
-        genero_musical: session.user.user_metadata?.genero_musical || '',
-        ciudad: session.user.user_metadata?.ciudad || '',
-        plan: 'gratuito',
-        avatar_url: null
+        nombre: session.user.email.split('@')[0],
+        tipo_cuenta: 'artista',
+        plan: 'gratuito'
       };
-      const { data: created } = await sb.from('tu_usuarios').insert(nuevo).select().single();
-      ME = created || nuevo;
+      try { await sb.from('tu_usuarios').insert(nuevo); } catch(e2){}
+      ME = nuevo;
     }
-  } catch(e) {
-    // Intentar crear de todas formas
-    const nuevo = {
-      id: session.user.id,
-      email: session.user.email,
-      nombre: session.user.email.split('@')[0],
-      tipo_cuenta: 'artista',
-      plan: 'gratuito'
-    };
-    try { await sb.from('tu_usuarios').insert(nuevo); } catch(e2){}
-    ME = nuevo;
-  }
 
-  renderProfile();
-  await loadPosts();
-  startRealtime();
-  contarNotificacionesSinLeer();
-  document.getElementById('loader').style.display = 'none';
+    renderProfile();
+    await loadPosts();
+    startRealtime();
+    contarNotificacionesSinLeer();
+  } catch(e) {
+    console.error('Init error:', e);
+  } finally {
+    clearTimeout(loaderTimeout);
+    document.getElementById('loader').style.display = 'none';
+  }
 }
 
 function fallback(s) {
@@ -785,6 +794,19 @@ function updateCounts() {
   document.getElementById('psTrack').textContent = tracks;
   document.getElementById('perfPC').textContent = mine;
   document.getElementById('perfTC').textContent = tracks;
+  // Cargar seguidores y siguiendo reales
+  loadFollowCounts();
+}
+
+async function loadFollowCounts() {
+  try {
+    const [segRes, sigRes] = await Promise.all([
+      sb.from('tu_seguidores').select('*',{count:'exact',head:true}).eq('seguido_id', ME.id),
+      sb.from('tu_seguidores').select('*',{count:'exact',head:true}).eq('seguidor_id', ME.id)
+    ]);
+    document.getElementById('psSeg').textContent = segRes.count||0;
+    document.getElementById('psSig').textContent = sigRes.count||0;
+  } catch(e){}
 }
 
 function renderFeed(posts, containerId='postsContainer') {
@@ -850,7 +872,9 @@ function closeSpotifyModal() { document.getElementById('spotifyModal').classList
 function clearModalErr() { document.getElementById('modalErr').classList.remove('show'); }
 
 function parseSpotify(url) {
-  const m = url.match(/open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
+  // Limpiar prefijos de idioma como /intl-es/, /intl-en/, etc.
+  const clean = url.replace(/open\.spotify\.com\/intl-[a-z]+\//,'open.spotify.com/');
+  const m = clean.match(/open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
   if (m) return { type:m[1], id:m[2] };
   const m2 = url.match(/spotify:(track|album|playlist|episode):([a-zA-Z0-9]+)/);
   if (m2) return { type:m2[1], id:m2[2] };
