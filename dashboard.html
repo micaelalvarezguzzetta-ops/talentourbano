@@ -11,314 +11,226 @@
 :root{
   --bg:#050508;--surface:#0c0c11;--card:#111118;
   --border:#1a1a26;--accent:#00e5ff;--accent2:#ff3366;
-  --purple:#a060ff;--text:#f0f0f5;--muted:#55556a;
+  --purple:#a060ff;--green:#1DB954;
+  --text:#f0f0f5;--muted:#55556a;
 }
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif}
+html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif}
 
-/* ── LOADING ── */
-#loader{
-  position:fixed;inset:0;background:var(--bg);z-index:9999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;
-}
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem}
 .loader-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:5px;color:var(--accent)}
 .loader-bar{width:140px;height:2px;background:var(--border);border-radius:1px;overflow:hidden}
-.loader-fill{height:100%;background:var(--accent);border-radius:1px;animation:lf 1.4s ease forwards}
-@keyframes lf{0%{width:0%}60%{width:80%}100%{width:100%}}
+.loader-fill{height:100%;background:var(--accent);animation:lf 1.4s ease forwards}
+@keyframes lf{0%{width:0%}100%{width:100%}}
 
-/* ── NAV ── */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;height:56px;
-  background:rgba(5,5,8,.92);backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 1.5rem;gap:1rem;
-}
-.nav-logo{
-  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;
-  display:flex;align-items:center;gap:.45rem;text-decoration:none;color:var(--text);
-  margin-right:1rem;
-}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:56px;background:rgba(5,5,8,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.5rem;gap:.5rem}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;display:flex;align-items:center;gap:.45rem;text-decoration:none;color:var(--text);margin-right:1rem}
 .ndot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
-
-/* Nav tabs */
-.nav-tabs{display:flex;gap:.15rem;flex:1}
-.nav-tab{
-  padding:.4rem .9rem;border-radius:6px;font-size:.78rem;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
-  color:var(--muted);border:none;background:transparent;transition:all .2s;
-  display:flex;align-items:center;gap:.4rem;
-}
+.nav-tabs{display:flex;gap:.1rem;flex:1}
+.nav-tab{padding:.38rem .8rem;border-radius:6px;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;color:var(--muted);border:none;background:transparent;transition:all .2s;display:flex;align-items:center;gap:.35rem}
 .nav-tab:hover{color:var(--text);background:rgba(255,255,255,.04)}
 .nav-tab.active{color:var(--accent);background:rgba(0,229,255,.07)}
-.nav-tab svg{width:14px;height:14px;flex-shrink:0}
 .nbadge{background:var(--accent2);color:#fff;font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:8px}
-
-.nav-right{display:flex;align-items:center;gap:.75rem;margin-left:auto}
-.nav-user-btn{
-  display:flex;align-items:center;gap:.55rem;
-  background:rgba(255,255,255,.04);border:1px solid var(--border);
-  border-radius:8px;padding:.35rem .75rem .35rem .45rem;cursor:pointer;
-  transition:all .2s;
-}
-.nav-user-btn:hover{border-color:rgba(0,229,255,.2)}
-.nav-av{
-  width:28px;height:28px;border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),#0088aa);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:#000;flex-shrink:0;
-}
-.nav-name{font-size:.78rem;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.btn-out{
-  padding:.38rem .85rem;border-radius:6px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);font-size:.72rem;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;
-}
+.nav-right{display:flex;align-items:center;gap:.65rem;margin-left:auto}
+.nav-user-btn{display:flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;padding:.3rem .7rem .3rem .4rem;cursor:pointer;transition:all .2s}
+.nav-user-btn:hover{border-color:rgba(0,229,255,.25)}
+.nav-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#0088aa);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:#000;flex-shrink:0}
+.nav-av.fan-av{background:linear-gradient(135deg,var(--purple),#6030aa)}
+.nav-name{font-size:.78rem;font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-out{padding:.35rem .8rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .btn-out:hover{color:var(--accent2);border-color:var(--accent2)}
 
-/* ── LAYOUT ── */
-.page{
-  margin-top:56px;
-  max-width:1200px;margin-left:auto;margin-right:auto;
-  display:grid;grid-template-columns:240px 1fr 260px;
-  gap:1.25rem;padding:1.5rem 1.25rem;min-height:calc(100vh - 56px);
-}
+/* LAYOUT */
+.page{margin-top:56px;max-width:1200px;margin-left:auto;margin-right:auto;display:grid;grid-template-columns:240px 1fr 260px;gap:1.25rem;padding:1.5rem 1.25rem}
 
-/* ── SIDEBAR IZQ ── */
+/* SIDEBAR IZQ */
 .sidebar-l{position:sticky;top:68px;height:fit-content;display:flex;flex-direction:column;gap:1rem}
-
-.profile-box{
-  background:var(--card);border:1px solid var(--border);border-radius:14px;
-  padding:1.4rem;text-align:center;position:relative;overflow:hidden;
-}
-.profile-box::before{
-  content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);
-  width:180px;height:180px;border-radius:50%;
-  background:radial-gradient(circle,rgba(0,229,255,.07) 0%,transparent 70%);pointer-events:none;
-}
-.pav{
-  width:68px;height:68px;border-radius:50%;margin:0 auto .9rem;
-  background:linear-gradient(135deg,var(--accent),#007a99);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#000;
-  border:2px solid rgba(0,229,255,.2);position:relative;
-}
-.pav-fan{background:linear-gradient(135deg,var(--purple),#6030aa)}
-.pav-badge{
-  position:absolute;bottom:-2px;right:-2px;
-  width:18px;height:18px;border-radius:50%;
-  background:var(--accent);border:2px solid var(--card);
-  display:flex;align-items:center;justify-content:center;font-size:.55rem;
-}
+.profile-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.4rem;text-align:center;position:relative;overflow:hidden}
+.profile-box::before{content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.07) 0%,transparent 70%);pointer-events:none}
+.pav{width:68px;height:68px;border-radius:50%;margin:0 auto .85rem;background:linear-gradient(135deg,var(--accent),#007a99);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#000;border:2px solid rgba(0,229,255,.25);position:relative}
+.pav.fan-pav{background:linear-gradient(135deg,var(--purple),#6030aa);border-color:rgba(160,96,255,.25)}
+.pav-badge{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:var(--accent);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:.55rem}
 .pav-badge.fan-badge{background:var(--purple)}
-.p-name{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;margin-bottom:.15rem}
-.p-tipo{
-  display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
-  padding:.2rem .6rem;border-radius:20px;margin-bottom:.25rem;
-}
+.p-name{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:1px;margin-bottom:.2rem}
+.p-tipo{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.18rem .58rem;border-radius:20px;margin-bottom:.3rem}
 .p-tipo.artista{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid rgba(0,229,255,.2)}
 .p-tipo.fan{background:rgba(160,96,255,.1);color:var(--purple);border:1px solid rgba(160,96,255,.2)}
-.p-genre{font-size:.73rem;color:var(--muted);margin-bottom:.15rem}
-.p-city{font-size:.72rem;color:var(--muted)}
+.p-genre{font-size:.72rem;color:var(--muted);margin-bottom:.12rem}
+.p-city{font-size:.7rem;color:var(--muted)}
 .p-stats{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.9rem}
-.ps{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem;text-align:center}
+.ps{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem;text-align:center;cursor:pointer;transition:border-color .15s}
+.ps:hover{border-color:rgba(0,229,255,.2)}
 .ps-n{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:var(--accent)}
 .ps-l{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
 
 .side-nav{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.6rem}
-.sn-item{
-  display:flex;align-items:center;gap:.65rem;
-  padding:.6rem .7rem;border-radius:8px;
-  font-size:.83rem;cursor:pointer;transition:all .15s;
-  color:var(--text);text-decoration:none;margin-bottom:1px;border:none;background:transparent;width:100%;text-align:left;
-}
+.sn-item{display:flex;align-items:center;gap:.6rem;padding:.58rem .7rem;border-radius:8px;font-size:.82rem;cursor:pointer;transition:all .15s;color:var(--text);text-decoration:none;margin-bottom:1px;border:none;background:transparent;width:100%;text-align:left}
 .sn-item:hover{background:var(--surface)}
 .sn-item.active{background:rgba(0,229,255,.07);color:var(--accent)}
-.sn-ico{font-size:.95rem;width:18px;text-align:center;flex-shrink:0}
+.sn-ico{font-size:.92rem;width:18px;text-align:center;flex-shrink:0}
 .sn-badge{margin-left:auto;background:var(--accent2);color:#fff;font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:8px}
 
-/* ── FEED CENTRAL ── */
+/* FEED */
 .feed{display:flex;flex-direction:column;gap:1rem}
 
-/* Crear post */
-.create-box{
-  background:var(--card);border:1px solid var(--border);border-radius:14px;
-  padding:1.1rem;
-}
-.create-top{display:flex;gap:.8rem;align-items:flex-start;margin-bottom:.85rem}
-.create-av{
-  width:36px;height:36px;border-radius:50%;flex-shrink:0;
-  background:linear-gradient(135deg,var(--accent),#007a99);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:#000;
-}
-.create-av.fan-av{background:linear-gradient(135deg,var(--purple),#6030aa)}
-textarea.ctxt{
-  flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;
-  padding:.7rem .9rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.86rem;
-  outline:none;resize:none;line-height:1.5;transition:border-color .2s;min-height:70px;
-}
+/* CREATE BOX */
+.create-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem;transition:border-color .2s}
+.create-box:focus-within{border-color:rgba(255,255,255,.12)}
+.create-header{display:flex;gap:.8rem;align-items:flex-start;margin-bottom:.75rem}
+.create-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--accent),#007a99);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:#000}
+.create-av.fan-av-c{background:linear-gradient(135deg,var(--purple),#6030aa)}
+.create-right{flex:1;min-width:0}
+textarea.ctxt{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.86rem;outline:none;resize:none;line-height:1.5;transition:border-color .2s;min-height:72px}
 textarea.ctxt:focus{border-color:rgba(255,255,255,.15)}
 textarea.ctxt::placeholder{color:var(--muted)}
-.create-bar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
-.ctool{
-  display:flex;align-items:center;gap:.3rem;font-size:.71rem;color:var(--muted);
-  padding:.32rem .65rem;border-radius:6px;background:var(--surface);border:1px solid var(--border);
-  cursor:pointer;transition:all .15s;
-}
+
+/* Spotify preview box */
+.spotify-preview{background:#0d1a0d;border:1px solid rgba(29,185,84,.25);border-radius:10px;padding:.8rem;margin-top:.65rem;display:none;align-items:center;gap:.75rem}
+.spotify-preview.show{display:flex}
+.sp-icon{width:36px;height:36px;border-radius:6px;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1rem}
+.sp-info{flex:1;min-width:0}
+.sp-title{font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-sub{font-size:.7rem;color:rgba(29,185,84,.8);margin-top:1px}
+.sp-remove{font-size:.75rem;color:var(--muted);cursor:pointer;flex-shrink:0;transition:color .15s}
+.sp-remove:hover{color:var(--accent2)}
+
+/* Toolbar */
+.create-toolbar{display:flex;gap:.45rem;margin-top:.75rem;align-items:center;flex-wrap:wrap}
+.ctool{display:flex;align-items:center;gap:.3rem;font-size:.71rem;color:var(--muted);padding:.3rem .65rem;border-radius:6px;background:var(--surface);border:1px solid var(--border);cursor:pointer;transition:all .15s;white-space:nowrap}
 .ctool:hover{color:var(--accent);border-color:rgba(0,229,255,.2)}
 .ctool.disabled-tool{opacity:.35;cursor:not-allowed}
 .ctool.disabled-tool:hover{color:var(--muted);border-color:var(--border)}
-.cpub{
-  margin-left:auto;padding:.38rem 1.1rem;border-radius:6px;border:none;
-  background:var(--accent);color:#000;font-weight:700;font-size:.77rem;
-  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;
-}
+.ctool.spotify-active{color:var(--green);border-color:rgba(29,185,84,.3);background:rgba(29,185,84,.06)}
+.cpub{margin-left:auto;padding:.38rem 1.2rem;border-radius:6px;border:none;background:var(--accent);color:#000;font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap}
 .cpub:hover{background:#00c8e0}
 .cpub:disabled{opacity:.4;cursor:not-allowed}
 
 /* Fan notice */
-.fan-notice{
-  background:rgba(160,96,255,.05);border:1px solid rgba(160,96,255,.15);
-  border-radius:10px;padding:.7rem 1rem;
-  font-size:.78rem;color:rgba(160,96,255,.8);
-  display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem;
-}
+.fan-notice{background:rgba(160,96,255,.05);border:1px solid rgba(160,96,255,.15);border-radius:10px;padding:.65rem 1rem;font-size:.77rem;color:rgba(160,96,255,.85);display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem}
 
-/* Tabs feed */
-.feed-tabs{display:flex;gap:2px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:.25rem}
-.ftab{flex:1;padding:.5rem;border-radius:7px;font-size:.75rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .2s}
+/* Spotify modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.show{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.75rem;width:100%;max-width:440px}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:1px;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
+.modal-sub{font-size:.8rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.5}
+.modal-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.72rem .9rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.86rem;outline:none;transition:border-color .2s;margin-bottom:.75rem}
+.modal-input:focus{border-color:rgba(29,185,84,.4);box-shadow:0 0 0 3px rgba(29,185,84,.07)}
+.modal-input::placeholder{color:#333}
+.modal-btns{display:flex;gap:.6rem}
+.modal-ok{flex:1;padding:.72rem;border-radius:8px;border:none;background:var(--green);color:#fff;font-weight:700;font-size:.84rem;cursor:pointer;transition:all .2s}
+.modal-ok:hover{background:#17a34a}
+.modal-cancel{padding:.72rem 1.2rem;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.84rem;cursor:pointer;transition:all .2s}
+.modal-cancel:hover{color:var(--text)}
+.modal-err{font-size:.76rem;color:var(--accent2);margin-bottom:.65rem;display:none}
+.modal-err.show{display:block}
+
+/* Feed tabs */
+.feed-tabs{display:flex;gap:2px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:3px}
+.ftab{flex:1;padding:.48rem;border-radius:7px;font-size:.74rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .2s}
 .ftab.active{background:var(--accent);color:#000}
 
-/* Post card */
-.post{
-  background:var(--card);border:1px solid var(--border);border-radius:14px;
-  padding:1.1rem;transition:border-color .2s;
-  animation:fu .35s ease both;
-}
-.post:hover{border-color:#222232}
+/* POST */
+.post{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem;transition:border-color .2s;animation:fu .35s ease both}
+.post:hover{border-color:#20202e}
 @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .post-hdr{display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem}
-.post-av{
-  width:38px;height:38px;border-radius:50%;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:1rem;
-}
+.post-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1rem}
 .post-meta{flex:1;min-width:0}
-.post-author{font-size:.86rem;font-weight:700;display:flex;align-items:center;gap:.35rem}
-.post-verified{width:14px;height:14px;background:var(--accent3, #00e5ff);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.post-author{font-size:.86rem;font-weight:700}
 .post-info{font-size:.7rem;color:var(--muted);margin-top:1px}
-.post-time{font-size:.68rem;color:var(--muted);white-space:nowrap}
+.post-time{font-size:.68rem;color:var(--muted);white-space:nowrap;flex-shrink:0}
+.my-tag{font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(0,229,255,.2);padding:.15rem .5rem;border-radius:20px;flex-shrink:0}
 .post-body{font-size:.85rem;color:rgba(240,240,245,.75);line-height:1.65;margin-bottom:.9rem}
-.post-tag{color:var(--accent);cursor:pointer}
-.post-tag:hover{text-decoration:underline}
+.post-body .htag{color:var(--accent);cursor:pointer}
+.post-body .htag:hover{text-decoration:underline}
 
-/* Track embed */
-.track-embed{
-  background:var(--surface);border:1px solid var(--border);border-radius:10px;
-  padding:.85rem;display:flex;gap:.85rem;align-items:center;margin-bottom:.9rem;
-}
-.te-cover{
-  width:46px;height:46px;border-radius:8px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
-}
-.te-info{flex:1;min-width:0}
-.te-title{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.te-artist{font-size:.7rem;color:var(--muted);margin-top:1px}
-.wf{width:100%;height:22px;display:flex;align-items:center;gap:1.5px;margin-top:.45rem;cursor:pointer}
-.wfb{flex:1;background:rgba(255,255,255,.08);border-radius:2px;transition:background .1s}
-.wfb.wp{background:var(--accent)}
-.play-circle{
-  width:32px;height:32px;border-radius:50%;border:none;
-  background:var(--accent);display:flex;align-items:center;justify-content:center;
-  cursor:pointer;flex-shrink:0;transition:transform .15s;
-}
-.play-circle:hover{transform:scale(1.1)}
+/* Spotify embed */
+.spotify-embed{margin-bottom:.9rem;border-radius:12px;overflow:hidden}
+.spotify-embed iframe{display:block;border-radius:12px}
 
-/* Collab tag */
-.collab-tag{
-  background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.1);
-  border-radius:8px;padding:.65rem .9rem;margin-bottom:.9rem;
-  display:flex;align-items:center;gap:.7rem;
-}
-.collab-tag-btn{
-  margin-left:auto;flex-shrink:0;font-size:.7rem;font-weight:700;
-  padding:.28rem .75rem;border-radius:20px;border:1px solid var(--accent);
-  background:transparent;color:var(--accent);cursor:pointer;transition:all .15s;
-}
-.collab-tag-btn:hover{background:rgba(0,229,255,.1)}
+/* Collab badge */
+.collab-badge{background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.12);border-radius:8px;padding:.65rem .9rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.7rem}
+.collab-btn{margin-left:auto;flex-shrink:0;font-size:.7rem;font-weight:700;padding:.28rem .75rem;border-radius:20px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .15s}
+.collab-btn:hover{background:rgba(0,229,255,.1)}
 
 /* Post actions */
-.post-acts{display:flex;gap:1.25rem;padding-top:.75rem;border-top:1px solid var(--border)}
-.pact{
-  display:flex;align-items:center;gap:.35rem;font-size:.75rem;
-  color:var(--muted);cursor:pointer;background:none;border:none;transition:color .15s;
-}
-.pact:hover{color:var(--text)}
+.post-acts{display:flex;gap:1.1rem;padding-top:.75rem;border-top:1px solid var(--border);align-items:center}
+.pact{display:flex;align-items:center;gap:.35rem;font-size:.76rem;color:var(--muted);cursor:pointer;background:none;border:none;transition:all .15s;padding:.25rem .4rem;border-radius:6px}
+.pact:hover{color:var(--text);background:rgba(255,255,255,.04)}
 .pact.liked{color:var(--accent2)}
-.pact svg{width:15px;height:15px;flex-shrink:0}
-
-/* Mi post (subido por el usuario actual) */
-.my-post-tag{
-  font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--accent);border:1px solid rgba(0,229,255,.2);
-  padding:.15rem .5rem;border-radius:20px;margin-left:auto;
-}
+.pact.liked:hover{color:var(--accent2)}
+.del-btn{margin-left:auto;font-size:.73rem;color:var(--muted);cursor:pointer;background:none;border:none;transition:color .15s;padding:.25rem .4rem;border-radius:6px}
+.del-btn:hover{color:var(--accent2);background:rgba(255,51,102,.07)}
 
 /* Empty */
-.empty-state{
-  background:var(--card);border:1px dashed var(--border);border-radius:14px;
-  padding:2.5rem;text-align:center;
-}
+.empty-state{background:var(--card);border:1px dashed var(--border);border-radius:14px;padding:2.5rem;text-align:center}
 .es-icon{font-size:2.5rem;margin-bottom:.75rem}
 .es-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;margin-bottom:.4rem}
 .es-sub{font-size:.82rem;color:var(--muted);line-height:1.5}
 
-/* ── SIDEBAR DER ── */
+/* SIDEBAR DER */
 .sidebar-r{position:sticky;top:68px;height:fit-content;display:flex;flex-direction:column;gap:1rem}
-
 .widget{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem}
-.widget-title{
-  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;
-  margin-bottom:.85rem;display:flex;align-items:center;justify-content:space-between;
-}
-.widget-more{font-family:'Space Grotesk',sans-serif;font-size:.68rem;color:var(--accent);cursor:pointer;font-weight:500;letter-spacing:.05em}
-
-/* Artista sugerido */
-.sugg-row{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border)}
+.widget-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;margin-bottom:.85rem;display:flex;align-items:center;justify-content:space-between}
+.widget-more{font-family:'Space Grotesk',sans-serif;font-size:.68rem;color:var(--accent);cursor:pointer;font-weight:500}
+.sugg-row{display:flex;align-items:center;gap:.6rem;padding:.48rem 0;border-bottom:1px solid var(--border)}
 .sugg-row:last-child{border-bottom:none}
 .sugg-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.9rem;flex-shrink:0}
 .sugg-info{flex:1;min-width:0}
 .sugg-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sugg-genre{font-size:.68rem;color:var(--muted)}
-.follow-btn{font-size:.68rem;font-weight:700;padding:.25rem .65rem;border-radius:20px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .15s;flex-shrink:0}
-.follow-btn:hover,.follow-btn.following{background:var(--accent);color:#000}
-
-/* Trending */
-.trend-item{padding:.45rem 0;border-bottom:1px solid var(--border);cursor:pointer}
+.sugg-genre{font-size:.67rem;color:var(--muted)}
+.follow-btn{font-size:.67rem;font-weight:700;padding:.24rem .65rem;border-radius:20px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .15s;flex-shrink:0}
+.follow-btn:hover{background:rgba(0,229,255,.1)}
+.follow-btn.following{background:var(--accent);color:#000}
+.follow-btn.following:hover{background:#00c8e0}
+.trend-item{padding:.42rem 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .15s}
 .trend-item:last-child{border-bottom:none}
-.trend-item:hover .trend-tag{color:var(--accent)}
-.trend-num{font-size:.62rem;color:var(--muted);font-family:monospace}
-.trend-tag{font-size:.82rem;font-weight:700;transition:color .15s}
-.trend-count{font-size:.67rem;color:var(--muted)}
+.trend-item:hover{opacity:.75}
+.trend-num{font-size:.6rem;color:var(--muted);font-family:monospace}
+.trend-tag{font-size:.82rem;font-weight:700;color:var(--text)}
+.trend-count{font-size:.66rem;color:var(--muted)}
 
-/* ── TOAST ── */
-.toast{
-  position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;
-  background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:.7rem 1.2rem;font-size:.82rem;
-  display:none;align-items:center;gap:.6rem;
-  box-shadow:0 8px 32px rgba(0,0,0,.5);animation:fu .3s ease;
-}
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem 1.2rem;font-size:.82rem;display:none;align-items:center;gap:.6rem;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:fu .3s ease;max-width:320px}
 .toast.show{display:flex}
-.toast.tok{border-color:rgba(0,229,255,.2);color:var(--accent)}
-.toast.terr{border-color:rgba(255,51,102,.2);color:var(--accent2)}
+.toast.tok{border-color:rgba(0,229,255,.25);color:var(--accent)}
+.toast.terr{border-color:rgba(255,51,102,.25);color:var(--accent2)}
 
-/* ── SPINNER ── */
+/* SPINNER */
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,229,255,.2);border-top-color:var(--accent);border-radius:50%;animation:sp .6s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 
-/* ── RESPONSIVE ── */
+/* SECCIÓN NOTIF / MENSAJES */
+.section-panel{display:none;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem}
+.section-panel.active{display:block}
+.sp-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;margin-bottom:1rem}
+.notif-item{display:flex;gap:.65rem;align-items:flex-start;padding:.7rem 0;border-bottom:1px solid var(--border)}
+.notif-item:last-child{border-bottom:none}
+.notif-ico{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.85rem}
+.notif-ico.lik{background:rgba(255,51,102,.12)}
+.notif-ico.fol{background:rgba(0,229,255,.1)}
+.notif-ico.com{background:rgba(160,96,255,.12)}
+.notif-text{font-size:.82rem;line-height:1.5}
+.notif-time{font-size:.68rem;color:var(--muted);margin-top:2px}
+
+/* PERFIL AMPLIADO */
+#tab-perfil{display:none}
+#tab-perfil.active{display:block}
+.perfil-header{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;display:flex;gap:1.5rem;align-items:center;margin-bottom:1rem}
+.perfil-big-av{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:#000;background:linear-gradient(135deg,var(--accent),#007a99);border:3px solid rgba(0,229,255,.2);flex-shrink:0}
+.perfil-big-av.fan-big{background:linear-gradient(135deg,var(--purple),#6030aa);border-color:rgba(160,96,255,.2)}
+.perfil-info{flex:1}
+.perfil-name{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:1px;line-height:1}
+.perfil-bio{font-size:.84rem;color:var(--muted);margin-top:.4rem;line-height:1.5}
+.perfil-stats{display:flex;gap:1.5rem;margin-top:.9rem}
+.perf-s{text-align:center}
+.perf-s-n{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent)}
+.perf-s-l{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+
 @media(max-width:1000px){.page{grid-template-columns:200px 1fr}.sidebar-r{display:none}}
-@media(max-width:700px){.page{grid-template-columns:1fr;padding:.75rem}.sidebar-l{display:none}.nav-tabs{display:none}}
+@media(max-width:680px){.page{grid-template-columns:1fr;padding:.75rem}.sidebar-l{display:none}.nav-tabs{display:none}}
 </style>
 </head>
 <body>
@@ -332,26 +244,13 @@ textarea.ctxt::placeholder{color:var(--muted)}
 <nav>
   <a class="nav-logo" href="index.html"><span class="ndot"></span>TU</a>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="setTab('muro')">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-      Muro
-    </button>
-    <button class="nav-tab" onclick="setTab('explorar')">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
-      Explorar
-    </button>
-    <button class="nav-tab" onclick="toast('Notificaciones próximamente 🔔','tok')">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-      Notificaciones
-      <span class="nbadge">3</span>
-    </button>
-    <button class="nav-tab" onclick="toast('Mensajes próximamente 💬','tok')">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-      Mensajes
-    </button>
+    <button class="nav-tab active" id="ntMuro" onclick="setTab('muro')">🏠 Muro</button>
+    <button class="nav-tab" id="ntExplorar" onclick="setTab('explorar')">🔍 Explorar</button>
+    <button class="nav-tab" id="ntNotif" onclick="setTab('notificaciones')">🔔 Notificaciones <span class="nbadge">3</span></button>
+    <button class="nav-tab" id="ntMsg" onclick="setTab('mensajes')">💬 Mensajes</button>
   </div>
   <div class="nav-right">
-    <div class="nav-user-btn" onclick="setTab('perfil')">
+    <div class="nav-user-btn" id="navUserBtn" onclick="setTab('perfil')">
       <div class="nav-av" id="navAv">?</div>
       <span class="nav-name" id="navNm">...</span>
     </div>
@@ -360,76 +259,141 @@ textarea.ctxt::placeholder{color:var(--muted)}
 </nav>
 
 <div class="page">
-
   <!-- SIDEBAR IZQ -->
   <aside class="sidebar-l">
     <div class="profile-box">
-      <div class="pav" id="profAv">
-        <span id="profAvTxt">?</span>
-        <div class="pav-badge" id="profBadge">🎤</div>
-      </div>
+      <div class="pav" id="profAv"><span id="profAvTxt">?</span><div class="pav-badge" id="profBadge">🎤</div></div>
       <div class="p-name" id="profName">—</div>
       <div class="p-tipo artista" id="profTipo">ARTISTA</div>
       <div class="p-genre" id="profGenre"></div>
       <div class="p-city" id="profCity"></div>
       <div class="p-stats">
-        <div class="ps"><div class="ps-n">0</div><div class="ps-l">Seguidores</div></div>
-        <div class="ps"><div class="ps-n">0</div><div class="ps-l">Siguiendo</div></div>
-        <div class="ps"><div class="ps-n" id="psPostCount">0</div><div class="ps-l">Posts</div></div>
-        <div class="ps"><div class="ps-n">0</div><div class="ps-l">Tracks</div></div>
+        <div class="ps" onclick="toast('Seguidores próximamente','tok')"><div class="ps-n" id="psSeg">0</div><div class="ps-l">Seguidores</div></div>
+        <div class="ps" onclick="toast('Siguiendo próximamente','tok')"><div class="ps-n" id="psSig">0</div><div class="ps-l">Siguiendo</div></div>
+        <div class="ps" onclick="setTab('muro')"><div class="ps-n" id="psPosts">0</div><div class="ps-l">Posts</div></div>
+        <div class="ps" onclick="toast('Tracks próximamente 🎵','tok')"><div class="ps-n">0</div><div class="ps-l">Tracks</div></div>
       </div>
     </div>
     <div class="side-nav">
-      <button class="sn-item active" onclick="setTab('muro')"><span class="sn-ico">🏠</span>Muro</button>
-      <button class="sn-item" onclick="setTab('explorar')"><span class="sn-ico">🔍</span>Explorar</button>
-      <button class="sn-item" onclick="toast('Próximamente 🔔','tok')"><span class="sn-ico">🔔</span>Notificaciones<span class="sn-badge">3</span></button>
-      <button class="sn-item" onclick="toast('Próximamente 💬','tok')"><span class="sn-ico">💬</span>Mensajes</button>
-      <button class="sn-item" id="snMusica" onclick="toast('Próximamente 🎵','tok')"><span class="sn-ico">🎵</span>Mi Música</button>
-      <button class="sn-item" id="snColabo" onclick="toast('Próximamente 🤝','tok')"><span class="sn-ico">🤝</span>Colaborar</button>
-      <button class="sn-item" onclick="toast('Próximamente 📅','tok')"><span class="sn-ico">📅</span>Eventos</button>
-      <button class="sn-item" onclick="setTab('perfil')"><span class="sn-ico">👤</span>Mi Perfil</button>
+      <button class="sn-item active" id="snMuro" onclick="setTab('muro')"><span class="sn-ico">🏠</span>Muro</button>
+      <button class="sn-item" id="snExplorar" onclick="setTab('explorar')"><span class="sn-ico">🔍</span>Explorar</button>
+      <button class="sn-item" id="snNotif" onclick="setTab('notificaciones')"><span class="sn-ico">🔔</span>Notificaciones<span class="sn-badge">3</span></button>
+      <button class="sn-item" id="snMsg" onclick="setTab('mensajes')"><span class="sn-ico">💬</span>Mensajes</button>
+      <button class="sn-item" id="snMusica"><span class="sn-ico">🎵</span>Mi Música</button>
+      <button class="sn-item" id="snColabo"><span class="sn-ico">🤝</span>Colaborar</button>
+      <button class="sn-item" onclick="toast('Eventos próximamente 📅','tok')"><span class="sn-ico">📅</span>Eventos</button>
+      <button class="sn-item" id="snPerfil" onclick="setTab('perfil')"><span class="sn-ico">👤</span>Mi Perfil</button>
     </div>
   </aside>
 
-  <!-- FEED / MURO -->
-  <main class="feed" id="mainFeed">
+  <!-- MAIN -->
+  <main>
+    <!-- === MURO === -->
+    <div id="tab-muro" class="feed">
 
-    <!-- Crear post -->
-    <div class="create-box" id="createBox">
-      <div class="create-top">
-        <div class="create-av" id="createAv">?</div>
-        <textarea class="ctxt" id="postTxt" placeholder="¿Qué estás creando hoy? Comparte un track, una idea, busca colabo..."></textarea>
+      <!-- CREAR POST -->
+      <div class="create-box" id="createBox">
+        <div id="fanNotice" style="display:none" class="fan-notice">👥 Como fan puedes publicar texto e interactuar. Para subir música crea una <a href="register.html" style="color:var(--purple);font-weight:700">cuenta de artista</a>.</div>
+        <div class="create-header">
+          <div class="create-av" id="createAv">?</div>
+          <div class="create-right">
+            <textarea class="ctxt" id="postTxt" rows="2" placeholder="¿Qué estás creando hoy? Comparte una idea, pega un link de Spotify, busca colabo..."></textarea>
+            <div class="spotify-preview" id="spPreview">
+              <div class="sp-icon">🎵</div>
+              <div class="sp-info">
+                <div class="sp-title" id="spTitle">Track de Spotify</div>
+                <div class="sp-sub" id="spSub">Se añadirá el reproductor al publicar</div>
+              </div>
+              <span class="sp-remove" onclick="removeSpotify()">✕ Quitar</span>
+            </div>
+          </div>
+        </div>
+        <div class="create-toolbar">
+          <div class="ctool" id="toolSpotify" onclick="openSpotifyModal()">🎵 Spotify</div>
+          <div class="ctool" id="toolImagen" onclick="toast('Imágenes próximamente 🖼️','tok')">🖼️ Imagen</div>
+          <div class="ctool" id="toolColabo" onclick="insertColabo()">🤝 Busco colabo</div>
+          <div class="ctool" id="toolEvento" onclick="toast('Eventos próximamente 📅','tok')">📅 Evento</div>
+          <button class="cpub" id="btnPub" onclick="publicarPost()">Publicar</button>
+        </div>
       </div>
-      <div class="create-bar" id="createBar">
-        <div class="ctool" id="toolMusica" onclick="toast('Subir música próximamente 🎵','tok')">🎵 Música</div>
-        <div class="ctool" id="toolImagen" onclick="toast('Subir imagen próximamente 🖼️','tok')">🖼️ Imagen</div>
-        <div class="ctool" id="toolEvento" onclick="toast('Crear evento próximamente 📅','tok')">📅 Evento</div>
-        <div class="ctool" id="toolColabo" onclick="toast('Buscar colabo próximamente 🤝','tok')">🤝 Colabo</div>
-        <button class="cpub" id="btnPub" onclick="publicarPost()">Publicar</button>
+
+      <!-- FEED TABS -->
+      <div class="feed-tabs">
+        <button class="ftab active" onclick="ftab(this,'todos')">Para ti</button>
+        <button class="ftab" onclick="ftab(this,'artistas')">Artistas</button>
+        <button class="ftab" onclick="ftab(this,'spotify')">🎵 Música</button>
+        <button class="ftab" onclick="ftab(this,'colaborar')">🤝 Colaborar</button>
+      </div>
+
+      <!-- POSTS -->
+      <div id="postsContainer">
+        <div style="text-align:center;padding:2.5rem;color:var(--muted)">
+          <div class="spin" style="margin:0 auto .75rem"></div>
+          <div style="font-size:.82rem">Cargando publicaciones...</div>
+        </div>
       </div>
     </div>
 
-    <!-- Tabs feed -->
-    <div class="feed-tabs">
-      <button class="ftab active" onclick="ftab(this,'todos')">Para ti</button>
-      <button class="ftab" onclick="ftab(this,'artistas')">Artistas</button>
-      <button class="ftab" onclick="ftab(this,'colaborar')">Colaborar</button>
-    </div>
-
-    <!-- Posts container -->
-    <div id="postsContainer">
-      <div style="text-align:center;padding:2rem;color:var(--muted)">
-        <div class="spin" style="margin:0 auto .75rem"></div>
-        <div style="font-size:.82rem">Cargando publicaciones...</div>
+    <!-- === EXPLORAR === -->
+    <div id="tab-explorar" style="display:none">
+      <div class="section-panel active">
+        <div class="sp-title">🔍 Explorar artistas</div>
+        <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.85rem">Directorio de artistas próximamente 🚀</div>
       </div>
     </div>
 
+    <!-- === NOTIFICACIONES === -->
+    <div id="tab-notificaciones" style="display:none">
+      <div class="section-panel active">
+        <div class="sp-title">🔔 Notificaciones</div>
+        <div class="notif-item">
+          <div class="notif-ico lik">❤️</div>
+          <div><div class="notif-text"><strong>Mikael Keys</strong> le dio like a tu publicación</div><div class="notif-time">hace 5 min</div></div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-ico fol">👤</div>
+          <div><div class="notif-text"><strong>DJ Nomad</strong> empezó a seguirte</div><div class="notif-time">hace 23 min</div></div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-ico com">💬</div>
+          <div><div class="notif-text"><strong>Ana Vidal</strong> comentó en tu post</div><div class="notif-time">hace 1h</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === MENSAJES === -->
+    <div id="tab-mensajes" style="display:none">
+      <div class="section-panel active">
+        <div class="sp-title">💬 Mensajes</div>
+        <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.85rem">Sistema de mensajes próximamente 🚀</div>
+      </div>
+    </div>
+
+    <!-- === PERFIL === -->
+    <div id="tab-perfil" style="display:none" class="feed">
+      <div class="perfil-header">
+        <div class="perfil-big-av" id="perfBigAv">?</div>
+        <div class="perfil-info">
+          <div class="perfil-name" id="perfName">—</div>
+          <div class="p-tipo artista" id="perfTipo" style="display:inline-block;margin-top:.4rem">ARTISTA</div>
+          <div class="perfil-bio" id="perfBio">Sin bio todavía · <span id="perfGenreCity"></span></div>
+          <div class="perfil-stats">
+            <div class="perf-s"><div class="perf-s-n" id="perfPostCount">0</div><div class="perf-s-l">Posts</div></div>
+            <div class="perf-s"><div class="perf-s-n">0</div><div class="perf-s-l">Seguidores</div></div>
+            <div class="perf-s"><div class="perf-s-n">0</div><div class="perf-s-l">Tracks</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="feed-tabs">
+        <button class="ftab active">Mis posts</button>
+        <button class="ftab" onclick="toast('Tracks próximamente 🎵','tok')">Mis tracks</button>
+      </div>
+      <div id="myPostsContainer"><div style="text-align:center;padding:2rem;color:var(--muted)"><div class="spin" style="margin:0 auto .75rem"></div></div></div>
+    </div>
   </main>
 
   <!-- SIDEBAR DER -->
   <aside class="sidebar-r">
-
-    <!-- Artistas sugeridos -->
     <div class="widget">
       <div class="widget-title">Artistas sugeridos <span class="widget-more">Ver todos</span></div>
       <div class="sugg-row">
@@ -453,18 +417,32 @@ textarea.ctxt::placeholder{color:var(--muted)}
         <button class="follow-btn" onclick="toggleFollow(this)">Seguir</button>
       </div>
     </div>
-
-    <!-- Trending -->
     <div class="widget">
       <div class="widget-title">Tendencias</div>
-      <div class="trend-item"><div class="trend-num">01</div><div class="trend-tag">#NuevaMusica</div><div class="trend-count">4.2K posts</div></div>
-      <div class="trend-item"><div class="trend-num">02</div><div class="trend-tag">#TrapEspañol</div><div class="trend-count">2.8K posts</div></div>
-      <div class="trend-item"><div class="trend-num">03</div><div class="trend-tag">#Colabora</div><div class="trend-count">1.9K posts</div></div>
+      <div class="trend-item" onclick="ftabByTag('#NuevaMusica')"><div class="trend-num">01</div><div class="trend-tag">#NuevaMusica</div><div class="trend-count">4.2K posts</div></div>
+      <div class="trend-item" onclick="ftabByTag('#TrapEspañol')"><div class="trend-num">02</div><div class="trend-tag">#TrapEspañol</div><div class="trend-count">2.8K posts</div></div>
+      <div class="trend-item" onclick="ftabByTag('#Colabora')"><div class="trend-num">03</div><div class="trend-tag">#Colabora</div><div class="trend-count">1.9K posts</div></div>
       <div class="trend-item"><div class="trend-num">04</div><div class="trend-tag">#Emergente2025</div><div class="trend-count">1.6K posts</div></div>
       <div class="trend-item"><div class="trend-num">05</div><div class="trend-tag">#BuscaProductor</div><div class="trend-count">980 posts</div></div>
     </div>
-
   </aside>
+</div>
+
+<!-- MODAL SPOTIFY -->
+<div class="modal-overlay" id="spotifyModal">
+  <div class="modal">
+    <div class="modal-title">🎵 Añadir canción de Spotify</div>
+    <div class="modal-sub">Pega el link de cualquier canción, álbum o playlist de Spotify y se añadirá el reproductor a tu publicación.</div>
+    <div class="modal-err" id="modalErr">⚠️ Link no válido. Usa un link de open.spotify.com</div>
+    <input class="modal-input" type="text" id="spotifyInput" placeholder="https://open.spotify.com/track/..." oninput="clearModalErr()"/>
+    <div style="font-size:.72rem;color:var(--muted);margin-bottom:1rem;line-height:1.5">
+      💡 Funciona con: <strong style="color:rgba(255,255,255,.6)">canciones, álbumes, playlists y episodios</strong>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeSpotifyModal()">Cancelar</button>
+      <button class="modal-ok" onclick="confirmSpotify()">✓ Añadir reproductor</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toastEl"></div>
@@ -473,38 +451,24 @@ textarea.ctxt::placeholder{color:var(--muted)}
 const { createClient } = supabase;
 const sb = createClient('https://hwgwacbmxipzldxusqpb.supabase.co','sb_publishable_YqjmVj7azpmy7JLPABe3FQ_Eb7HUNkS');
 
-let ME = null; // datos del usuario actual
-let postsData = []; // posts cargados
+let ME = null;
+let allPosts = [];
+let spotifyEmbedId = null;
+let spotifyEmbedType = 'track';
 let currentTab = 'muro';
 
-// ══════════════════════════════════════
+// ══════════════════════════════
 // INIT
-// ══════════════════════════════════════
+// ══════════════════════════════
 async function init() {
   const { data:{ session } } = await sb.auth.getSession();
   if (!session) { window.location.href = 'register.html'; return; }
 
   try {
     const { data } = await sb.from('tu_usuarios').select('*').eq('id', session.user.id).single();
-    ME = data || {
-      id: session.user.id,
-      nombre: session.user.email.split('@')[0],
-      email: session.user.email,
-      plan: 'gratuito',
-      tipo_cuenta: 'artista',
-      genero_musical: '',
-      ciudad: ''
-    };
+    ME = data || fallbackUser(session);
   } catch(e) {
-    ME = {
-      id: session.user.id,
-      nombre: session.user.email.split('@')[0],
-      email: session.user.email,
-      plan: 'gratuito',
-      tipo_cuenta: 'artista',
-      genero_musical: '',
-      ciudad: ''
-    };
+    ME = fallbackUser(session);
   }
 
   renderProfile();
@@ -512,9 +476,13 @@ async function init() {
   document.getElementById('loader').style.display = 'none';
 }
 
-// ══════════════════════════════════════
-// RENDER PERFIL
-// ══════════════════════════════════════
+function fallbackUser(s) {
+  return { id:s.user.id, nombre:s.user.email.split('@')[0], email:s.user.email, plan:'gratuito', tipo_cuenta:'artista', genero_musical:'', ciudad:'' };
+}
+
+// ══════════════════════════════
+// PERFIL
+// ══════════════════════════════
 function renderProfile() {
   const ini = (ME.nombre||'?').charAt(0).toUpperCase();
   const esFan = ME.tipo_cuenta === 'fan';
@@ -522,280 +490,392 @@ function renderProfile() {
   // Nav
   document.getElementById('navAv').textContent = ini;
   document.getElementById('navNm').textContent = ME.nombre||'Artista';
+  if (esFan) document.getElementById('navAv').classList.add('fan-av');
 
   // Sidebar
   document.getElementById('profAvTxt').textContent = ini;
   document.getElementById('profName').textContent = ME.nombre||'—';
-  document.getElementById('profGenre').textContent = ME.genero_musical || '';
+  document.getElementById('profGenre').textContent = ME.genero_musical||'';
   document.getElementById('profCity').textContent = ME.ciudad ? '📍 '+ME.ciudad : '';
-
-  const tipoBadge = document.getElementById('profTipo');
-  const avEl = document.getElementById('profAv');
-  const badge = document.getElementById('profBadge');
-  const createAvEl = document.getElementById('createAv');
+  document.getElementById('createAv').textContent = ini;
 
   if (esFan) {
-    tipoBadge.textContent = 'FAN';
-    tipoBadge.className = 'p-tipo fan';
-    avEl.classList.add('pav-fan');
-    badge.textContent = '👥';
-    badge.className = 'pav-badge fan-badge';
-    createAvEl.className = 'create-av fan-av';
-    // Fan no puede subir música ni pedir colabo
-    document.getElementById('toolMusica').className = 'ctool disabled-tool';
+    document.getElementById('profAv').classList.add('fan-pav');
+    document.getElementById('profBadge').textContent = '👥';
+    document.getElementById('profBadge').classList.add('fan-badge');
+    document.getElementById('profTipo').textContent = 'FAN';
+    document.getElementById('profTipo').className = 'p-tipo fan';
+    document.getElementById('createAv').classList.add('fan-av-c');
+    document.getElementById('fanNotice').style.display = 'flex';
+    document.getElementById('toolSpotify').className = 'ctool disabled-tool';
     document.getElementById('toolColabo').className = 'ctool disabled-tool';
     document.getElementById('toolEvento').className = 'ctool disabled-tool';
     document.getElementById('snMusica').style.display = 'none';
     document.getElementById('snColabo').style.display = 'none';
-    // Añadir aviso fan
-    const notice = document.createElement('div');
-    notice.className = 'fan-notice';
-    notice.innerHTML = '👥 Como fan puedes comentar y dar like. Para subir música, crea una <a href="register.html" style="color:var(--purple);font-weight:700">cuenta de artista</a>.';
-    document.getElementById('createBox').insertBefore(notice, document.getElementById('createBar'));
     document.getElementById('postTxt').placeholder = 'Comenta, reacciona o comparte algo con la comunidad...';
+    // Perfil
+    document.getElementById('perfBigAv').classList.add('fan-big');
+    document.getElementById('perfTipo').textContent = 'FAN';
+    document.getElementById('perfTipo').className = 'p-tipo fan';
+  } else {
+    document.getElementById('snMusica').onclick = ()=>toast('Mi música próximamente 🎵','tok');
+    document.getElementById('snColabo').onclick = ()=>toast('Buscar colabo próximamente 🤝','tok');
   }
 
-  createAvEl.textContent = ini;
+  // Perfil tab
+  document.getElementById('perfBigAv').textContent = ini;
+  document.getElementById('perfName').textContent = ME.nombre||'—';
+  const gc = [ME.genero_musical, ME.ciudad ? '📍 '+ME.ciudad : ''].filter(Boolean).join(' · ');
+  document.getElementById('perfGenreCity').textContent = gc;
 }
 
-// ══════════════════════════════════════
-// CARGAR POSTS desde Supabase
-// ══════════════════════════════════════
+// ══════════════════════════════
+// CARGAR POSTS
+// ══════════════════════════════
 async function loadPosts() {
   try {
     const { data, error } = await sb
       .from('tu_posts')
-      .select(`*, tu_usuarios(nombre, genero_musical, ciudad, tipo_cuenta)`)
+      .select('*, tu_usuarios(nombre,genero_musical,ciudad,tipo_cuenta)')
       .order('creado_en', { ascending: false })
-      .limit(20);
-
+      .limit(30);
     if (error) throw error;
-    postsData = data || [];
-  } catch(e) {
-    postsData = [];
-  }
-  renderPosts(postsData);
+    allPosts = data || [];
+  } catch(e) { allPosts = []; }
+  renderFeed(allPosts);
+  updatePostCount();
 }
 
-// ══════════════════════════════════════
-// RENDERIZAR POSTS
-// ══════════════════════════════════════
-function renderPosts(posts) {
-  const container = document.getElementById('postsContainer');
-  if (posts.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="es-icon">🎵</div>
-        <div class="es-title">El muro está vacío</div>
-        <div class="es-sub">Sé el primero en publicar algo. Comparte tu música, busca colaboración o saluda a la comunidad.</div>
-      </div>
-      ${getSamplePosts()}`;
-    buildWaveforms();
+function updatePostCount() {
+  const mine = allPosts.filter(p=>p.usuario_id===ME?.id).length;
+  document.getElementById('psPosts').textContent = mine;
+  document.getElementById('perfPostCount').textContent = mine;
+}
+
+// ══════════════════════════════
+// RENDERIZAR FEED
+// ══════════════════════════════
+const COLORS = ['linear-gradient(135deg,#1a0a2e,#2e0a1a)','linear-gradient(135deg,#0a1a2e,#1a2e0a)','linear-gradient(135deg,#2e1a0a,#0a0a2e)','linear-gradient(135deg,#0a2e1a,#2e0a2e)','linear-gradient(135deg,#1a1a0a,#0a1a1a)'];
+
+function renderFeed(posts, container='postsContainer') {
+  const el = document.getElementById(container);
+  if (!posts.length) {
+    el.innerHTML = `<div class="empty-state"><div class="es-icon">🎵</div><div class="es-title">Sin publicaciones aún</div><div class="es-sub">Sé el primero en compartir algo con la comunidad.</div></div>`;
     return;
   }
-
-  let html = '';
-  posts.forEach((p, i) => {
-    const u = p.tu_usuarios;
-    const nombre = u?.nombre || 'Artista';
-    const ini = nombre.charAt(0).toUpperCase();
-    const genero = u?.genero_musical || '';
-    const ciudad = u?.ciudad || '';
-    const isMine = p.usuario_id === ME?.id;
-    const hace = timeAgo(p.creado_en);
-    const colors = ['linear-gradient(135deg,#1a0a2e,#2e0a1a)','linear-gradient(135deg,#0a1a2e,#1a2e0a)','linear-gradient(135deg,#2e1a0a,#0a0a2e)','linear-gradient(135deg,#0a2e1a,#2e0a2e)'];
-    const color = colors[i % colors.length];
-
-    html += `
-    <div class="post" style="animation-delay:${i*0.05}s">
-      <div class="post-hdr">
-        <div class="post-av" style="background:${color}">${ini}</div>
-        <div class="post-meta">
-          <div class="post-author">${nombre}</div>
-          <div class="post-info">${genero ? genero+' · ':''} ${ciudad ? '📍'+ciudad+' · ':''} ${hace}</div>
-        </div>
-        ${isMine ? '<span class="my-post-tag">Tu post</span>' : ''}
-      </div>
-      <div class="post-body">${formatText(p.contenido||'')}</div>
-      <div class="post-acts">
-        <button class="pact" onclick="toggleLike(this)">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-          ${p.likes_count||0}
-        </button>
-        <button class="pact" onclick="toast('Comentarios próximamente 💬','tok')">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-          ${p.comentarios_count||0}
-        </button>
-        <button class="pact" onclick="toast('¡Compartido! ↗️','tok')">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
-          Compartir
-        </button>
-        ${isMine ? `<button class="pact" style="margin-left:auto;color:var(--accent2)" onclick="borrarPost('${p.id}', this)">🗑 Borrar</button>` : ''}
-      </div>
-    </div>`;
-  });
-
-  container.innerHTML = html + getSamplePosts();
-  buildWaveforms();
-  document.getElementById('psPostCount').textContent = posts.filter(p=>p.usuario_id===ME?.id).length;
+  el.innerHTML = posts.map((p,i) => buildPostHTML(p, i)).join('');
 }
 
-function getSamplePosts() {
-  return `
-  <div class="post" style="animation-delay:.15s">
+function buildPostHTML(p, i=0) {
+  const u = p.tu_usuarios || {};
+  const nombre = u.nombre || 'Artista';
+  const ini = nombre.charAt(0).toUpperCase();
+  const color = COLORS[i % COLORS.length];
+  const isMine = p.usuario_id === ME?.id;
+  const hace = timeAgo(p.creado_en);
+  const genero = u.genero_musical || '';
+  const ciudad = u.ciudad ? '📍 '+u.ciudad : '';
+  const meta = [genero, ciudad, hace].filter(Boolean).join(' · ');
+
+  // Spotify embed
+  let embedHTML = '';
+  if (p.spotify_embed_id) {
+    const tipo = p.spotify_embed_type || 'track';
+    const h = tipo === 'track' ? '152' : '352';
+    embedHTML = `<div class="spotify-embed">
+      <iframe src="https://open.spotify.com/embed/${tipo}/${p.spotify_embed_id}?utm_source=generator&theme=0"
+        width="100%" height="${h}" frameBorder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"></iframe>
+    </div>`;
+  }
+
+  // Texto formateado
+  const bodyTxt = p.contenido ? formatText(p.contenido) : '';
+  const bodyHTML = bodyTxt ? `<div class="post-body">${bodyTxt}</div>` : '';
+
+  // Collab badge
+  const collabHTML = p.es_colaboracion ? `<div class="collab-badge">
+    <span>🤝</span>
+    <div><div style="font-size:.78rem;font-weight:700;color:var(--accent)">Busca colaboración</div><div style="font-size:.68rem;color:var(--muted)">${genero||'Música'} · ${ciudad||'España'}</div></div>
+    <button class="collab-btn" onclick="toast('Contacto próximamente 💬','tok')">Contactar</button>
+  </div>` : '';
+
+  return `<div class="post" id="post-${p.id}" style="animation-delay:${i*0.04}s">
     <div class="post-hdr">
-      <div class="post-av" style="background:linear-gradient(135deg,#1a0a2e,#2e0a1a)">MK</div>
+      <div class="post-av" style="background:${color}">${ini}</div>
       <div class="post-meta">
-        <div class="post-author">Mikael Keys</div>
-        <div class="post-info">Trap · 📍 Madrid · hace 20 min</div>
+        <div class="post-author">${nombre}</div>
+        <div class="post-info">${meta}</div>
       </div>
+      ${isMine ? '<span class="my-tag">Mi post</span>' : ''}
     </div>
-    <div class="track-embed">
-      <div class="te-cover" style="background:linear-gradient(135deg,#1a0a2e,#2e0a2e)">🎵</div>
-      <div class="te-info">
-        <div class="te-title">Noche Sin Fin</div>
-        <div class="te-artist">Mikael Keys · 3:42</div>
-        <div class="wf" id="wf1"></div>
-      </div>
-      <button class="play-circle" onclick="togglePlay(this)">
-        <svg width="11" height="11" fill="#000" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    ${bodyHTML}
+    ${embedHTML}
+    ${collabHTML}
+    <div class="post-acts">
+      <button class="pact ${(p.liked_by_me||false)?'liked':''}" onclick="toggleLike(this,'${p.id}')">
+        ❤️ <span class="lc">${p.likes_count||0}</span>
       </button>
-    </div>
-    <div class="post-body">Nuevo single después de 3 meses en el estudio 🔥 <span class="post-tag">#trap</span> <span class="post-tag">#nuevamusica</span></div>
-    <div class="post-acts">
-      <button class="pact liked" onclick="toggleLike(this)">❤️ 2.1K</button>
-      <button class="pact" onclick="toast('Comentarios próximamente','tok')">💬 87</button>
-      <button class="pact" onclick="toast('Compartido ↗️','tok')">↗️ Compartir</button>
-    </div>
-  </div>
-  <div class="post" style="animation-delay:.2s">
-    <div class="post-hdr">
-      <div class="post-av" style="background:linear-gradient(135deg,#0a1a2e,#1a2e0a)">AV</div>
-      <div class="post-meta">
-        <div class="post-author">Ana Vidal</div>
-        <div class="post-info">Dream Pop · 📍 Barcelona · hace 1h</div>
-      </div>
-    </div>
-    <div class="post-body">Buscando productor para mi EP 🎹 ¿Alguien trabaja Dream Pop con toques electrónicos? DM abierto. <span class="post-tag">#colaboracion</span></div>
-    <div class="collab-tag">
-      <span style="font-size:1rem">🤝</span>
-      <div><div style="font-size:.78rem;font-weight:700;color:var(--accent)">Busca colaboración</div><div style="font-size:.68rem;color:var(--muted)">Productor · Dream Pop · Bcn o remoto</div></div>
-      <button class="collab-tag-btn" onclick="toast('Contacto próximamente 💬','tok')">Contactar</button>
-    </div>
-    <div class="post-acts">
-      <button class="pact" onclick="toggleLike(this)">❤️ 342</button>
-      <button class="pact" onclick="toast('Comentarios próximamente','tok')">💬 54</button>
-      <button class="pact" onclick="toast('Compartido','tok')">↗️ Compartir</button>
+      <button class="pact" onclick="toast('Comentarios próximamente 💬','tok')">
+        💬 ${p.comentarios_count||0}
+      </button>
+      <button class="pact" onclick="sharePost('${p.id}')">↗️ Compartir</button>
+      ${isMine ? `<button class="del-btn" onclick="borrarPost('${p.id}')">🗑 Borrar</button>` : ''}
     </div>
   </div>`;
 }
 
-// ══════════════════════════════════════
-// PUBLICAR POST
-// ══════════════════════════════════════
+// ══════════════════════════════
+// SPOTIFY
+// ══════════════════════════════
+function openSpotifyModal() {
+  if (ME?.tipo_cuenta === 'fan') { toast('Solo artistas pueden subir música 🎤','terr'); return; }
+  document.getElementById('spotifyInput').value = '';
+  document.getElementById('modalErr').classList.remove('show');
+  document.getElementById('spotifyModal').classList.add('show');
+  setTimeout(()=>document.getElementById('spotifyInput').focus(), 100);
+}
+
+function closeSpotifyModal() {
+  document.getElementById('spotifyModal').classList.remove('show');
+}
+
+function clearModalErr() {
+  document.getElementById('modalErr').classList.remove('show');
+}
+
+function parseSpotifyUrl(url) {
+  // Soporta: track, album, playlist, episode
+  const m = url.match(/open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/);
+  if (m) return { type: m[1], id: m[2] };
+  // Spotify URI: spotify:track:ID
+  const m2 = url.match(/spotify:(track|album|playlist|episode):([a-zA-Z0-9]+)/);
+  if (m2) return { type: m2[1], id: m2[2] };
+  return null;
+}
+
+function confirmSpotify() {
+  const url = document.getElementById('spotifyInput').value.trim();
+  const parsed = parseSpotifyUrl(url);
+  if (!parsed) {
+    document.getElementById('modalErr').classList.add('show');
+    return;
+  }
+  spotifyEmbedId = parsed.id;
+  spotifyEmbedType = parsed.type;
+
+  // Mostrar preview
+  const typeNames = { track:'Canción', album:'Álbum', playlist:'Playlist', episode:'Episodio' };
+  document.getElementById('spTitle').textContent = typeNames[parsed.type] + ' de Spotify añadido';
+  document.getElementById('spSub').textContent = 'Se mostrará el reproductor en tu publicación';
+  document.getElementById('spPreview').classList.add('show');
+  document.getElementById('toolSpotify').classList.add('spotify-active');
+  document.getElementById('toolSpotify').textContent = '✓ Spotify';
+
+  closeSpotifyModal();
+  toast('🎵 Reproductor de Spotify añadido','tok');
+}
+
+function removeSpotify() {
+  spotifyEmbedId = null;
+  spotifyEmbedType = 'track';
+  document.getElementById('spPreview').classList.remove('show');
+  document.getElementById('toolSpotify').classList.remove('spotify-active');
+  document.getElementById('toolSpotify').textContent = '🎵 Spotify';
+}
+
+// Detectar Spotify al pegar en el textarea
+document.getElementById('postTxt').addEventListener('paste', function(e) {
+  setTimeout(() => {
+    const txt = this.value;
+    const parsed = parseSpotifyUrl(txt);
+    if (parsed && !spotifyEmbedId) {
+      spotifyEmbedId = parsed.id;
+      spotifyEmbedType = parsed.type;
+      const typeNames = { track:'Canción', album:'Álbum', playlist:'Playlist', episode:'Episodio' };
+      document.getElementById('spTitle').textContent = typeNames[parsed.type]+' de Spotify detectado';
+      document.getElementById('spSub').textContent = 'Se añadirá el reproductor automáticamente';
+      document.getElementById('spPreview').classList.add('show');
+      document.getElementById('toolSpotify').classList.add('spotify-active');
+      document.getElementById('toolSpotify').textContent = '✓ Spotify';
+      // Limpiar el link del textarea
+      this.value = this.value.replace(/https?:\/\/open\.spotify\.com\/[^\s]+/g, '').replace(/spotify:[^\s]+/g, '').trim();
+      toast('🎵 Spotify detectado automáticamente','tok');
+    }
+  }, 50);
+});
+
+// ══════════════════════════════
+// COLABO SHORTCUT
+// ══════════════════════════════
+function insertColabo() {
+  if (ME?.tipo_cuenta === 'fan') { toast('Solo artistas pueden buscar colaboraciones','terr'); return; }
+  const txt = document.getElementById('postTxt');
+  const add = '🤝 Busco colaboración — ';
+  if (!txt.value.startsWith(add)) txt.value = add + txt.value;
+  txt.focus();
+}
+
+// ══════════════════════════════
+// PUBLICAR
+// ══════════════════════════════
 async function publicarPost() {
   const txt = document.getElementById('postTxt').value.trim();
-  if (!txt) { toast('⚠️ Escribe algo primero','terr'); return; }
-  if (!ME) { toast('⚠️ Sesión no encontrada','terr'); return; }
+  const tieneSpotify = !!spotifyEmbedId;
+
+  if (!txt && !tieneSpotify) { toast('⚠️ Escribe algo o añade una canción de Spotify','terr'); return; }
+  if (!ME) { toast('⚠️ Error de sesión. Recarga la página.','terr'); return; }
 
   const btn = document.getElementById('btnPub');
   btn.disabled = true;
   btn.textContent = '...';
 
+  const esColabo = txt.toLowerCase().includes('colabo') || txt.toLowerCase().includes('colabor') || txt.toLowerCase().includes('busco');
+
   try {
-    const { error } = await sb.from('tu_posts').insert({
+    const payload = {
       usuario_id: ME.id,
-      tipo: 'texto',
-      contenido: txt
-    });
+      tipo: tieneSpotify ? 'spotify' : 'texto',
+      contenido: txt || null,
+      spotify_embed_id: spotifyEmbedId || null,
+      spotify_embed_type: spotifyEmbedType || null,
+      es_colaboracion: esColabo,
+      likes_count: 0,
+      comentarios_count: 0
+    };
+    const { error } = await sb.from('tu_posts').insert(payload);
     if (error) throw error;
+
     document.getElementById('postTxt').value = '';
-    toast('✅ ¡Post publicado!','tok');
+    removeSpotify();
+    toast('✅ ¡Publicación subida!','tok');
     await loadPosts();
   } catch(e) {
-    toast('⚠️ Error al publicar. Inténtalo de nuevo.','terr');
+    console.error(e);
+    toast('⚠️ Error al publicar: '+e.message,'terr');
   }
   btn.disabled = false;
   btn.textContent = 'Publicar';
 }
 
-// ══════════════════════════════════════
+// ══════════════════════════════
+// LIKES
+// ══════════════════════════════
+async function toggleLike(btn, postId) {
+  const isLiked = btn.classList.contains('liked');
+  btn.classList.toggle('liked');
+  const lcEl = btn.querySelector('.lc');
+  const current = parseInt(lcEl.textContent)||0;
+  lcEl.textContent = isLiked ? Math.max(0,current-1) : current+1;
+
+  try {
+    if (!isLiked) {
+      await sb.from('tu_likes').upsert({ post_id: postId, usuario_id: ME.id });
+      await sb.from('tu_posts').update({ likes_count: current+1 }).eq('id', postId);
+    } else {
+      await sb.from('tu_likes').delete().eq('post_id', postId).eq('usuario_id', ME.id);
+      await sb.from('tu_posts').update({ likes_count: Math.max(0,current-1) }).eq('id', postId);
+    }
+  } catch(e) { /* silencioso */ }
+}
+
+// ══════════════════════════════
 // BORRAR POST
-// ══════════════════════════════════════
-async function borrarPost(id, btn) {
-  if (!confirm('¿Borrar este post?')) return;
+// ══════════════════════════════
+async function borrarPost(id) {
+  if (!confirm('¿Borrar esta publicación?')) return;
   try {
     await sb.from('tu_posts').delete().eq('id', id).eq('usuario_id', ME.id);
-    btn.closest('.post').remove();
-    toast('🗑 Post eliminado','tok');
+    document.getElementById('post-'+id)?.remove();
+    allPosts = allPosts.filter(p=>p.id!==id);
+    updatePostCount();
+    toast('🗑 Publicación eliminada','tok');
   } catch(e) { toast('Error al borrar','terr'); }
 }
 
-// ══════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════
-function timeAgo(date) {
-  if (!date) return '';
-  const diff = (Date.now() - new Date(date)) / 1000;
-  if (diff < 60) return 'ahora mismo';
-  if (diff < 3600) return 'hace '+Math.floor(diff/60)+' min';
-  if (diff < 86400) return 'hace '+Math.floor(diff/3600)+'h';
-  return 'hace '+Math.floor(diff/86400)+'d';
+// ══════════════════════════════
+// COMPARTIR
+// ══════════════════════════════
+function sharePost(id) {
+  const url = window.location.origin + '/dashboard.html#post-'+id;
+  if (navigator.share) {
+    navigator.share({ title:'TalentoUrbano', url });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(url);
+    toast('🔗 Link copiado al portapapeles','tok');
+  }
 }
 
-function formatText(txt) {
-  return txt
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/#(\w+)/g,'<span class="post-tag">#$1</span>')
-    .replace(/\n/g,'<br>');
-}
-
-function buildWaveforms() {
-  document.querySelectorAll('.wf').forEach(wf => {
-    if (wf.children.length) return;
-    const n=36, p=0.35;
-    for (let i=0;i<n;i++) {
-      const b=document.createElement('div');
-      b.className='wfb'+(i<n*p?' wp':'');
-      b.style.height=(4+Math.random()*16)+'px';
-      wf.appendChild(b);
-    }
-  });
-}
-
-function togglePlay(btn) {
-  const on = btn.dataset.p==='1';
-  btn.dataset.p = on?'0':'1';
-  btn.innerHTML = on
-    ? '<svg width="11" height="11" fill="#000" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
-    : '<svg width="11" height="11" fill="#000" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
-}
-
-function toggleLike(btn) { btn.classList.toggle('liked'); }
-
-function toggleFollow(btn) {
-  btn.classList.toggle('following');
-  btn.textContent = btn.classList.contains('following') ? 'Siguiendo' : 'Seguir';
-}
-
+// ══════════════════════════════
+// TABS
+// ══════════════════════════════
+const TABS = ['muro','explorar','notificaciones','mensajes','perfil'];
 function setTab(t) {
   currentTab = t;
+  TABS.forEach(id => {
+    const el = document.getElementById('tab-'+id);
+    if (el) el.style.display = id===t ? (id==='muro'||id==='perfil'?'flex':'block') : 'none';
+  });
+  // Nav active
   document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+  const map = {muro:'ntMuro',explorar:'ntExplorar',notificaciones:'ntNotif',mensajes:'ntMsg'};
+  if (map[t]) document.getElementById(map[t])?.classList.add('active');
+  // Sidebar active
   document.querySelectorAll('.sn-item').forEach(x=>x.classList.remove('active'));
-  if (t==='muro') {
-    document.querySelectorAll('.nav-tab')[0].classList.add('active');
-    document.querySelectorAll('.sn-item')[0].classList.add('active');
+  const snMap = {muro:'snMuro',explorar:'snExplorar',notificaciones:'snNotif',mensajes:'snMsg',perfil:'snPerfil'};
+  if (snMap[t]) document.getElementById(snMap[t])?.classList.add('active');
+
+  if (t === 'perfil') renderMyPosts();
+  if (t === 'muro') {
+    document.getElementById('tab-muro').style.display = 'flex';
+    document.getElementById('tab-muro').style.flexDirection = 'column';
   }
-  if (t==='perfil') { toast('Perfil completo próximamente 👤','tok'); return; }
-  if (t==='explorar') { toast('Explorar próximamente 🔍','tok'); return; }
+}
+
+function renderMyPosts() {
+  const mine = allPosts.filter(p=>p.usuario_id===ME?.id);
+  renderFeed(mine, 'myPostsContainer');
 }
 
 function ftab(el, tipo) {
   document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));
   el.classList.add('active');
-  if (tipo==='todos') renderPosts(postsData);
-  else if (tipo==='artistas') renderPosts(postsData.filter(p=>p.tu_usuarios?.tipo_cuenta==='artista'));
-  else renderPosts(postsData.filter(p=>p.contenido?.toLowerCase().includes('colabo')||p.tipo==='colaboracion'));
+  if (tipo==='todos') renderFeed(allPosts);
+  else if (tipo==='artistas') renderFeed(allPosts.filter(p=>p.tu_usuarios?.tipo_cuenta==='artista'));
+  else if (tipo==='spotify') renderFeed(allPosts.filter(p=>p.spotify_embed_id));
+  else if (tipo==='colaborar') renderFeed(allPosts.filter(p=>p.es_colaboracion));
+}
+
+function ftabByTag(tag) {
+  setTab('muro');
+  const filtered = allPosts.filter(p=>p.contenido?.toLowerCase().includes(tag.toLowerCase().replace('#','')));
+  renderFeed(filtered);
+  toast('Mostrando posts con '+tag,'tok');
+}
+
+// ══════════════════════════════
+// HELPERS
+// ══════════════════════════════
+function timeAgo(date) {
+  if (!date) return '';
+  const diff = (Date.now()-new Date(date))/1000;
+  if (diff<60) return 'ahora mismo';
+  if (diff<3600) return 'hace '+Math.floor(diff/60)+' min';
+  if (diff<86400) return 'hace '+Math.floor(diff/3600)+'h';
+  return 'hace '+Math.floor(diff/86400)+'d';
+}
+
+function formatText(txt) {
+  return txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/#(\w+)/g,'<span class="htag">#$1</span>')
+    .replace(/\n/g,'<br>');
+}
+
+function toggleFollow(btn) {
+  btn.classList.toggle('following');
+  btn.textContent = btn.classList.contains('following') ? 'Siguiendo' : 'Seguir';
+  toast(btn.classList.contains('following') ? '✅ Siguiendo' : 'Dejaste de seguir','tok');
 }
 
 let toastTimer;
@@ -804,7 +884,7 @@ function toast(msg, tipo='tok') {
   el.textContent = msg;
   el.className = 'toast show '+tipo;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>el.classList.remove('show'),2800);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 3000);
 }
 
 async function doLogout() {
@@ -812,6 +892,14 @@ async function doLogout() {
   window.location.href = 'register.html';
 }
 
+// Cerrar modal con Escape
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') closeSpotifyModal();
+});
+
+// Init
+document.getElementById('tab-muro').style.display = 'flex';
+document.getElementById('tab-muro').style.flexDirection = 'column';
 init();
 </script>
 </body>
