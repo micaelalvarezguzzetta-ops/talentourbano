@@ -519,7 +519,19 @@ textarea.ctxt::placeholder{color:var(--muted)}
         <div class="perfil-info">
           <div class="perfil-name" id="perfName">—</div>
           <div class="p-tipo artista" id="perfTipo" style="display:inline-block;margin-top:.35rem">ARTISTA</div>
-          <div class="perfil-bio"><span id="perfGC"></span></div>
+          <div class="perfil-bio" id="perfBioWrap">
+            <span id="perfGC" onclick="abrirEditBio()" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,.15);padding-bottom:1px" title="Editar bio"></span>
+            <button id="perfBioEditBtn" onclick="abrirEditBio()" style="margin-left:.4rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;opacity:.6" title="Editar bio">✏️</button>
+          </div>
+          <!-- Editor de bio inline -->
+          <div id="perfBioEditor" style="display:none;margin-top:.4rem;width:100%">
+            <textarea id="perfBioInput" maxlength="160" rows="2" placeholder="Escribe tu bio (máx. 160 caracteres)..."
+              style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(0,229,255,.3);border-radius:8px;padding:.5rem .75rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.82rem;resize:none;outline:none;line-height:1.5"></textarea>
+            <div style="display:flex;gap:.5rem;margin-top:.35rem;justify-content:flex-end">
+              <button onclick="cancelarEditBio()" style="padding:.3rem .75rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.75rem;cursor:pointer">Cancelar</button>
+              <button onclick="guardarBio()" style="padding:.3rem .85rem;border-radius:6px;border:none;background:var(--accent);color:#000;font-size:.75rem;font-weight:700;cursor:pointer">Guardar</button>
+            </div>
+          </div>
           <div class="perfil-stats">
             <div class="perf-s"><div class="perf-s-n" id="perfPC">0</div><div class="perf-s-l">Posts</div></div>
             <div class="perf-s"><div class="perf-s-n">0</div><div class="perf-s-l">Seguidores</div></div>
@@ -591,6 +603,7 @@ textarea.ctxt::placeholder{color:var(--muted)}
         <span id="upGenre" style="font-size:.74rem;color:var(--muted)"></span>
         <span id="upCity" style="font-size:.74rem;color:var(--muted)"></span>
       </div>
+      <div id="upBio" style="font-size:.82rem;color:#9898c0;margin-top:.5rem;line-height:1.55;display:none"></div>
       <div class="uprofile-stats">
         <div class="ups"><div class="ups-n" id="upPosts">0</div><div class="ups-l">Posts</div></div>
         <div class="ups"><div class="ups-n" id="upSeg">0</div><div class="ups-l">Seguidores</div></div>
@@ -727,7 +740,9 @@ function renderProfile() {
   document.getElementById('perfName').textContent = ME.nombre||'—';
 
   const gc = [ME.genero_musical, ME.ciudad ? '📍 '+ME.ciudad : ''].filter(Boolean).join(' · ');
-  document.getElementById('perfGC').textContent = gc || 'Sin bio todavía';
+  const bioText = ME.bio || gc || 'Toca para añadir tu bio ✏️';
+  document.getElementById('perfGC').textContent = bioText;
+  document.getElementById('perfGC').style.color = ME.bio ? '#cccce0' : 'var(--muted)';
 
   if (esFan) {
     document.getElementById('profAv').classList.add('fan-pav');
@@ -747,7 +762,7 @@ function renderProfile() {
     document.getElementById('postTxt').placeholder = 'Comenta o comparte algo con la comunidad...';
   } else {
     document.getElementById('snMusica').onclick = ()=>{ setTab('perfil'); setTimeout(showTracksTab,200); };
-    document.getElementById('snColabo').onclick = ()=>toast('Buscar colabo próximamente 🤝','tok');
+    document.getElementById('snColabo').onclick = ()=>setTab('colaborar');
   }
 }
 
@@ -869,6 +884,39 @@ function updateCounts() {
   document.getElementById('perfTC').textContent = tracks;
   // Cargar seguidores y siguiendo reales
   loadFollowCounts();
+}
+
+// ══ BIO EDITABLE ══
+function abrirEditBio() {
+  const editor = document.getElementById('perfBioEditor');
+  const input = document.getElementById('perfBioInput');
+  if (!editor || !input) return;
+  input.value = ME.bio || '';
+  editor.style.display = 'block';
+  input.focus();
+}
+function cancelarEditBio() {
+  const editor = document.getElementById('perfBioEditor');
+  if (editor) editor.style.display = 'none';
+}
+async function guardarBio() {
+  const input = document.getElementById('perfBioInput');
+  const bio = input?.value.trim() || '';
+  try {
+    const { error } = await sb.from('tu_usuarios')
+      .update({ bio })
+      .eq('id', ME.id);
+    if (error) throw error;
+    ME.bio = bio;
+    const span = document.getElementById('perfGC');
+    const gc = [ME.genero_musical, ME.ciudad ? '📍 '+ME.ciudad : ''].filter(Boolean).join(' · ');
+    span.textContent = bio || gc || 'Toca para añadir tu bio ✏️';
+    span.style.color = bio ? '#cccce0' : 'var(--muted)';
+    cancelarEditBio();
+    toast('✅ Bio actualizada','tok');
+  } catch(e) {
+    toast('Error al guardar: '+e.message,'terr');
+  }
 }
 
 async function loadFollowCounts() {
@@ -1237,6 +1285,11 @@ async function openUserProfile(userId) {
     document.getElementById('upName').textContent = u.nombre||'—';
     document.getElementById('upGenre').textContent = u.genero_musical||'';
     document.getElementById('upCity').textContent = u.ciudad ? '📍 '+u.ciudad : '';
+    const bioEl = document.getElementById('upBio');
+    if (bioEl) {
+      bioEl.textContent = u.bio || '';
+      bioEl.style.display = u.bio ? 'block' : 'none';
+    }
     const tipoEl = document.getElementById('upTipo');
     tipoEl.textContent = u.tipo_cuenta === 'fan' ? 'FAN' : 'ARTISTA';
     tipoEl.className = 'p-tipo '+(u.tipo_cuenta==='fan'?'fan':'artista');
