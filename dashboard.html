@@ -1049,13 +1049,10 @@ async function sendComment() {
     });
     if (error) throw error;
 
-    // Notificar al dueño del post
-    const p = allPosts.find(x=>x.id===currentCommentPostId);
-    if (p) crearNotificacion('comentario', p.usuario_id, ME.id, ME.nombre||'Alguien', currentCommentPostId, txt.substring(0,60));
-
-    // Incrementar contador
+    // Notificar al dueño del post e incrementar contador
     const p = allPosts.find(x=>x.id===currentCommentPostId);
     if (p) {
+      crearNotificacion('comentario', p.usuario_id, ME.id, ME.nombre||'Alguien', currentCommentPostId, txt.substring(0,60));
       p.comentarios_count = (p.comentarios_count||0)+1;
       const ccEl = document.getElementById('cc-'+currentCommentPostId);
       if (ccEl) ccEl.textContent = p.comentarios_count;
