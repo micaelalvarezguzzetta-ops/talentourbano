@@ -190,6 +190,8 @@ textarea.ctxt::placeholder{color:var(--muted)}
 .post{background:linear-gradient(160deg,var(--card2) 0%,var(--card) 100%);border:1px solid var(--border);border-radius:16px;padding:1.15rem;animation:fu .35s ease both;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .post:hover{border-color:rgba(100,100,160,.4);box-shadow:0 4px 20px rgba(0,0,0,.3)}
 @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(20px)}}
 .post-hdr{display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem}
 .post-av{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.1rem;overflow:hidden}
 .post-av img{width:100%;height:100%;object-fit:cover}
@@ -284,6 +286,12 @@ textarea.ctxt::placeholder{color:var(--muted)}
 
 /* TOAST */
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem 1.2rem;font-size:.82rem;display:none;align-items:center;gap:.6rem;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:fu .3s ease;max-width:320px}
+.msg-toast{position:fixed;top:70px;right:1rem;z-index:9998;background:var(--card2);border:1px solid rgba(0,229,255,.2);border-radius:14px;padding:.75rem 1rem;display:flex;align-items:center;gap:.75rem;box-shadow:0 8px 32px rgba(0,0,0,.6);cursor:pointer;max-width:280px;animation:slideIn .3s ease;transform-origin:top right}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px) scale(.95)}to{opacity:1;transform:translateX(0) scale(1)}}
+.msg-toast-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#007a99);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#000;flex-shrink:0}
+.msg-toast-body{flex:1;min-width:0}
+.msg-toast-name{font-size:.8rem;font-weight:700;color:var(--text)}
+.msg-toast-text{font-size:.73rem;color:#9898c0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 .toast.show{display:flex}
 .toast.tok{border-color:rgba(0,229,255,.25);color:var(--accent)}
 .toast.terr{border-color:rgba(255,51,102,.25);color:var(--accent2)}
@@ -308,7 +316,7 @@ textarea.ctxt::placeholder{color:var(--muted)}
     <button class="nav-tab active" id="ntMuro" onclick="setTab('muro')">🏠 Muro</button>
     <button class="nav-tab" id="ntExplorar" onclick="setTab('explorar')">🔍 Explorar</button>
     <button class="nav-tab" id="ntNotif" onclick="setTab('notificaciones')">🔔 Notificaciones <span class="nbadge" style="display:none">0</span></button>
-    <button class="nav-tab" id="ntMsg" onclick="setTab('mensajes')">💬 Mensajes</button>
+    <button class="nav-tab" id="ntMsg" onclick="setTab('mensajes')">💬 Mensajes <span class="nbadge" id="msgBadgeNav" style="display:none">0</span></button>
   </div>
   <div class="nav-right">
     <div class="nav-user-btn" onclick="setTab('perfil')">
@@ -349,7 +357,7 @@ textarea.ctxt::placeholder{color:var(--muted)}
       <button class="sn-item active" id="snMuro" onclick="setTab('muro')"><span class="sn-ico">🏠</span>Muro</button>
       <button class="sn-item" id="snExplorar" onclick="setTab('explorar')"><span class="sn-ico">🔍</span>Explorar</button>
       <button class="sn-item" id="snNotif" onclick="setTab('notificaciones')"><span class="sn-ico">🔔</span>Notificaciones<span class="sn-badge" style="display:none">0</span></button>
-      <button class="sn-item" id="snMsg" onclick="setTab('mensajes')"><span class="sn-ico">💬</span>Mensajes</button>
+      <button class="sn-item" id="snMsg" onclick="setTab('mensajes')"><span class="sn-ico">💬</span>Mensajes<span class="sn-badge" id="msgBadgeSide" style="display:none">0</span></button>
       <button class="sn-item" id="snMusica"><span class="sn-ico">🎵</span>Mi Música</button>
       <button class="sn-item" id="snColabo"><span class="sn-ico">🤝</span>Colaborar</button>
       <button class="sn-item" onclick="toast('Eventos próximamente 📅','tok')"><span class="sn-ico">📅</span>Eventos</button>
@@ -641,6 +649,7 @@ async function init() {
     await loadPosts();
     startRealtime();
     contarNotificacionesSinLeer();
+    contarMensajesSinLeer();
   } catch(e) {
     console.error('Init error:', e);
   } finally {
@@ -1304,6 +1313,9 @@ async function iniciarConversacion(userId, userName) {
   document.getElementById('chatInput').placeholder = `Mensaje a ${userName}...`;
   document.getElementById('chatMessages').innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><div class="spin" style="margin:0 auto"></div></div>';
 
+  // Marcar mensajes de este usuario como leídos
+  marcarMensajesLeidos(userId);
+
   await loadMessages();
   cargarConversaciones(); // refrescar lista
 
@@ -1366,6 +1378,8 @@ async function sendChatMsg() {
       contenido: txt
     });
     if (error) throw error;
+    // Notificar al destinatario
+    crearNotificacion('mensaje', currentChatUserId, ME.id, ME.nombre||'Alguien', null, txt.substring(0,60));
     // El realtime lo mostrará, pero por si acaso también lo añadimos localmente
     appendMessage({ remitente_id:ME.id, contenido:txt, creado_en:new Date().toISOString() }, true);
   } catch(e) {
@@ -1407,35 +1421,91 @@ async function cargarNotificaciones() {
       return;
     }
 
-    const iconos = { like:'❤️', comentario:'💬', seguidor:'👤', repost:'🔁', mencion:'📣' };
-    const clases = { like:'lik', comentario:'com', seguidor:'fol', repost:'lik', mencion:'com' };
+    const iconos = { like:'❤️', comentario:'💬', seguidor:'👤', repost:'🔁', mencion:'📣', mensaje:'💌' };
+    const clases = { like:'lik', comentario:'com', seguidor:'fol', repost:'lik', mencion:'com', mensaje:'msg' };
 
     el.innerHTML = data.map(n => {
       const ico = iconos[n.tipo]||'🔔';
       const cls = clases[n.tipo]||'lik';
-      const noLeida = !n.leida ? 'background:rgba(0,229,255,.04);border-left:2px solid var(--accent);' : '';
+      const noLeida = !n.leida;
       const textos = {
         like: `<strong>${n.actor_nombre}</strong> le dio like a tu publicación`,
-        comentario: `<strong>${n.actor_nombre}</strong> comentó: "<em>${n.extra||'...'}</em>"`,
+        comentario: `<strong>${n.actor_nombre}</strong> comentó en tu publicación`,
         seguidor: `<strong>${n.actor_nombre}</strong> empezó a seguirte`,
         repost: `<strong>${n.actor_nombre}</strong> republicó tu publicación`,
         mencion: `<strong>${n.actor_nombre}</strong> te mencionó en un post`,
+        mensaje: `<strong>${n.actor_nombre}</strong> te envió un mensaje`,
       };
-      return `<div class="notif-item" style="${noLeida}" id="notif-${n.id}">
-        <div class="notif-ico ${cls}">${ico}</div>
-        <div style="flex:1">
-          <div class="notif-text">${textos[n.tipo]||n.tipo}</div>
-          <div class="notif-time">${timeAgo(n.creado_en)}</div>
-        </div>
-        ${!n.leida ? `<div style="width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:4px"></div>` : ''}
-      </div>`;
+      const textoExtra = n.extra && (n.tipo==='comentario'||n.tipo==='mensaje') ? ` <em style="color:#aaa">"${n.extra}"</em>` : '';
+      const hasAction = (['like','comentario','repost','mencion'].includes(n.tipo) && n.post_id)
+                     || n.tipo==='seguidor' || n.tipo==='mensaje';
+      const noLeidaStyle = noLeida ? 'background:rgba(0,229,255,.04);border-left:2px solid var(--accent);' : '';
+      return '<div class="notif-item"'
+        + ' data-tipo="' + n.tipo + '"'
+        + ' data-post="' + (n.post_id||'') + '"'
+        + ' data-actor="' + (n.actor_id||'') + '"'
+        + ' data-nombre="' + (n.actor_nombre||'').replace(/"/g,'') + '"'
+        + ' style="' + noLeidaStyle + 'cursor:' + (hasAction?'pointer':'default') + ';border-radius:10px;padding:.75rem;margin-bottom:2px;transition:background .15s"'
+        + ' id="notif-' + n.id + '">'
+        + '<div class="notif-ico ' + cls + '">' + ico + '</div>'
+        + '<div style="flex:1">'
+        + '<div class="notif-text">' + (textos[n.tipo]||n.tipo) + textoExtra + '</div>'
+        + '<div class="notif-time">' + timeAgo(n.creado_en) + '</div>'
+        + '</div>'
+        + (noLeida ? '<div style="width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:6px"></div>' : '')
+        + '</div>';
     }).join('');
+
+    // Event delegation — un listener, sin problemas de comillas en onclick
+    el.onclick = function(e) {
+      const item = e.target.closest('.notif-item[data-tipo]');
+      if (!item) return;
+      const tipo = item.dataset.tipo;
+      const postId = item.dataset.post;
+      const actorId = item.dataset.actor;
+      const actorNombre = item.dataset.nombre;
+      if (['like','comentario','repost','mencion'].includes(tipo) && postId) {
+        notifGoPost(postId);
+      } else if (tipo === 'seguidor' && actorId) {
+        openUserProfile(actorId);
+      } else if (tipo === 'mensaje' && actorId) {
+        notifGoChat(actorId, actorNombre);
+      }
+    };
+    el.onmouseover = function(e) {
+      const item = e.target.closest('.notif-item');
+      if (item && item.style.cursor === 'pointer') item.style.background = 'rgba(255,255,255,.07)';
+    };
+    el.onmouseout = function(e) {
+      const item = e.target.closest('.notif-item');
+      if (!item) return;
+      item.style.background = item.style.borderLeft ? 'rgba(0,229,255,.04)' : 'transparent';
+    };
 
     // Marcar como leídas al ver
     setTimeout(() => marcarTodasLeidas(), 2500);
   } catch(e) {
     el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.82rem">Error al cargar</div>';
   }
+}
+
+// Helpers de navegación desde notificaciones
+function notifGoPost(postId) {
+  setTab('muro');
+  setTimeout(() => {
+    const el = document.getElementById('post-' + postId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.style.outline = '2px solid var(--accent)';
+      el.style.borderRadius = '16px';
+      setTimeout(() => { el.style.outline = ''; }, 2000);
+    }
+  }, 400);
+}
+
+function notifGoChat(userId, userName) {
+  setTab('mensajes');
+  setTimeout(() => abrirChat(userId, userName), 350);
 }
 
 async function marcarTodasLeidas() {
@@ -1466,7 +1536,26 @@ function actualizarBadgeNotif(n) {
   });
 }
 
-// ══ REALTIME — likes y posts en vivo ══
+let unreadMsgCount = 0;
+async function contarMensajesSinLeer() {
+  try {
+    const { count } = await sb.from('tu_mensajes')
+      .select('*', { count:'exact', head:true })
+      .eq('destinatario_id', ME.id)
+      .eq('leido', false);
+    unreadMsgCount = count||0;
+    actualizarBadgeMsg(unreadMsgCount);
+  } catch(e){}
+}
+
+function actualizarBadgeMsg(n) {
+  const nav = document.getElementById('msgBadgeNav');
+  const side = document.getElementById('msgBadgeSide');
+  const txt = n > 0 ? (n > 99 ? '99+' : String(n)) : '';
+  [nav, side].forEach(b => { if(b){ b.textContent = txt; b.style.display = n > 0 ? '' : 'none'; } });
+}
+
+// ══ REALTIME — likes, posts, mensajes y notificaciones en vivo ══
 function startRealtime() {
   sb.channel('tu_realtime')
     .on('postgres_changes', {
@@ -1492,10 +1581,28 @@ function startRealtime() {
       if (n.usuario_id === ME?.id) {
         unreadNotifCount++;
         actualizarBadgeNotif(unreadNotifCount);
-        // Si la pestaña notificaciones está abierta, recargar
         if (document.getElementById('tab-notificaciones').style.display !== 'none') {
           cargarNotificaciones();
         }
+      }
+    })
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'tu_mensajes'
+    }, payload => {
+      const m = payload.new;
+      if (m.destinatario_id === ME?.id) {
+        const tabMensajes = document.getElementById('tab-mensajes');
+        const tabAbierta = tabMensajes && tabMensajes.style.display !== 'none';
+        const chatActivo = tabAbierta && currentChatUserId === m.remitente_id;
+        if (!chatActivo) {
+          contarMensajesSinLeer();
+          // Mini popup tipo Instagram
+          sb.from('tu_usuarios').select('nombre').eq('id', m.remitente_id).single().then(({data}) => {
+            showMsgToast(data?.nombre||'Alguien', m.contenido, m.remitente_id);
+          });
+        }
+        if (tabAbierta) cargarConversaciones();
+        if (chatActivo) { marcarMensajesLeidos(m.remitente_id); appendMessage(m, false); }
       }
     })
     .subscribe();
@@ -1578,7 +1685,13 @@ function setTab(t) {
   const sn = {muro:'snMuro',explorar:'snExplorar',notificaciones:'snNotif',mensajes:'snMsg',perfil:'snPerfil'};
   if (sn[t]) document.getElementById(sn[t])?.classList.add('active');
   if (t==='perfil') showPostsTab();
-  if (t==='mensajes') cargarConversaciones();
+  if (t==='mensajes') {
+    cargarConversaciones();
+    // Marcar mensajes como leídos y limpiar badge
+    unreadMsgCount = 0;
+    actualizarBadgeMsg(0);
+    sb.from('tu_mensajes').update({leido:true}).eq('destinatario_id',ME.id).eq('leido',false).then(()=>{}).catch(()=>{});
+  }
   if (t==='notificaciones') cargarNotificaciones();
 }
 
@@ -1610,6 +1723,27 @@ function toggleFollow(btn) {
   toast(btn.classList.contains('following')?'✅ Siguiendo':'Dejaste de seguir','tok');
 }
 let tt;
+function showMsgToast(nombre, texto, userId) {
+  // Eliminar popup anterior si existe
+  const prev = document.getElementById('msgToast');
+  if (prev) prev.remove();
+  const d = document.createElement('div');
+  d.id = 'msgToast';
+  d.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1c1c2e;border:1px solid rgba(0,229,255,.25);border-radius:14px;padding:.9rem 1.1rem;display:flex;gap:.75rem;align-items:center;z-index:9999;cursor:pointer;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:slideUp .3s ease;max-width:300px;min-width:220px';
+  d.innerHTML = `
+    <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#007a99);display:flex;align-items:center;justify-content:center;font-size:.95rem;font-family:'Bebas Neue',sans-serif;color:#000;flex-shrink:0">
+      ${nombre.charAt(0).toUpperCase()}
+    </div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:.78rem;font-weight:700;color:var(--text)">💌 ${nombre}</div>
+      <div style="font-size:.72rem;color:#9898c0;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${texto}</div>
+    </div>
+    <div onclick="event.stopPropagation();this.parentNode.remove()" style="color:var(--muted);font-size:.85rem;padding:.2rem">✕</div>`;
+  d.onclick = () => { d.remove(); notifGoChat(userId, nombre); };
+  document.body.appendChild(d);
+  setTimeout(() => { if(d.parentNode) d.style.animation='slideDown .3s ease forwards'; setTimeout(()=>d.remove(),300); }, 5000);
+}
+
 function toast(msg,tipo='tok') {
   const el=document.getElementById('toastEl');
   el.textContent=msg; el.className='toast show '+tipo;
