@@ -161,6 +161,24 @@ textarea.ctxt::placeholder{color:var(--muted)}
 .share-opt-ico{font-size:1.4rem;flex-shrink:0}
 .share-opt-info strong{display:block;font-size:.86rem;font-weight:700;margin-bottom:.15rem}
 .share-opt-info span{font-size:.74rem;color:var(--muted)}
+
+/* USER PROFILE MODAL */
+.uprofile-modal{max-width:520px;padding:0;overflow:hidden}
+.uprofile-banner{height:80px;background:linear-gradient(135deg,#0a0a18,#1a0a2e,#0a1a2e);position:relative}
+.uprofile-body{padding:1.25rem 1.5rem 1.5rem}
+.uprofile-av{width:72px;height:72px;border-radius:50%;border:3px solid var(--card);position:absolute;bottom:-36px;left:1.5rem;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#000}
+.uprofile-av img{width:100%;height:100%;object-fit:cover}
+.uprofile-top{display:flex;justify-content:flex-end;margin-bottom:.5rem}
+.uprofile-name{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:1px;line-height:1;margin-bottom:.2rem}
+.uprofile-stats{display:flex;gap:1.5rem;margin:.85rem 0}
+.ups{text-align:center}
+.ups-n{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--accent)}
+.ups-l{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.follow-big{padding:.5rem 1.4rem;border-radius:8px;border:1px solid var(--accent);background:transparent;color:var(--accent);font-weight:700;font-size:.84rem;cursor:pointer;transition:all .2s}
+.follow-big.following{background:var(--accent);color:#000}
+.follow-big:hover{background:rgba(0,229,255,.1)}
+.follow-big.following:hover{background:#00c8e0}
+.uprofile-posts{margin-top:.75rem;display:flex;flex-direction:column;gap:.65rem;max-height:340px;overflow-y:auto}
 .modal-btns{display:flex;gap:.6rem}
 .modal-ok{flex:1;padding:.72rem;border-radius:8px;border:none;background:var(--green);color:#fff;font-weight:700;font-size:.84rem;cursor:pointer;transition:all .2s}
 .modal-ok:hover{background:#17a34a}
@@ -483,6 +501,36 @@ textarea.ctxt::placeholder{color:var(--muted)}
 
 <div class="toast" id="toastEl"></div>
 
+<!-- MODAL PERFIL USUARIO -->
+<div class="modal-overlay" id="userProfileModal">
+  <div class="modal uprofile-modal">
+    <div class="uprofile-banner" id="upBanner">
+      <div class="uprofile-av" id="upAv">?</div>
+    </div>
+    <div class="uprofile-body">
+      <div class="uprofile-top">
+        <button class="follow-big" id="upFollowBtn" onclick="toggleFollowUser()">Seguir</button>
+        <button class="modal-cancel" onclick="closeUserProfile()" style="margin-left:.5rem">✕</button>
+      </div>
+      <div class="uprofile-name" id="upName">—</div>
+      <div style="display:flex;gap:.5rem;align-items:center;margin-top:.2rem">
+        <div class="p-tipo artista" id="upTipo">ARTISTA</div>
+        <span id="upGenre" style="font-size:.74rem;color:var(--muted)"></span>
+        <span id="upCity" style="font-size:.74rem;color:var(--muted)"></span>
+      </div>
+      <div class="uprofile-stats">
+        <div class="ups"><div class="ups-n" id="upPosts">0</div><div class="ups-l">Posts</div></div>
+        <div class="ups"><div class="ups-n" id="upSeg">0</div><div class="ups-l">Seguidores</div></div>
+        <div class="ups"><div class="ups-n" id="upTracks">0</div><div class="ups-l">Tracks</div></div>
+      </div>
+      <div style="font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.08em">Publicaciones recientes</div>
+      <div class="uprofile-posts" id="upPosts2">
+        <div style="text-align:center;padding:1.5rem;color:var(--muted)"><div class="spin" style="margin:0 auto"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL COMENTARIOS -->
 <div class="modal-overlay" id="commentsModal">
   <div class="modal modal-wide">
@@ -736,8 +784,8 @@ function buildPost(p, i=0) {
   const meta = [u.genero_musical, u.ciudad?'📍'+u.ciudad:'', hace].filter(Boolean).join(' · ');
 
   const avHTML = u.avatar_url
-    ? `<div class="post-av" style="background:${color}"><img src="${u.avatar_url}" onerror="this.style.display='none';this.nextSibling.style.display='flex'" /><span style="display:none">${ini}</span></div>`
-    : `<div class="post-av" style="background:${color}">${ini}</div>`;
+    ? `<div class="post-av" style="background:${color};cursor:pointer" onclick="openUserProfile('${p.usuario_id}')"><img src="${u.avatar_url}" onerror="this.style.display='none';this.nextSibling.style.display='flex'" /><span style="display:none">${ini}</span></div>`
+    : `<div class="post-av" style="background:${color};cursor:pointer" onclick="openUserProfile('${p.usuario_id}')">${ini}</div>`;
 
   const embedHTML = p.spotify_embed_id ? `<div class="spotify-embed">
     <iframe src="https://open.spotify.com/embed/${p.spotify_embed_type||'track'}/${p.spotify_embed_id}?utm_source=generator&theme=0"
@@ -756,7 +804,7 @@ function buildPost(p, i=0) {
   return `<div class="post" id="post-${p.id}" style="animation-delay:${i*.04}s">
     <div class="post-hdr">
       ${avHTML}
-      <div class="post-meta"><div class="post-author">${nombre}</div><div class="post-info">${meta}</div></div>
+      <div class="post-meta"><div class="post-author" style="cursor:pointer" onclick="openUserProfile('${p.usuario_id}')">${nombre}</div><div class="post-info">${meta}</div></div>
       ${isMine ? '<span class="my-tag">Mi post</span>' : ''}
     </div>
     ${bodyHTML}${embedHTML}${collabHTML}
@@ -1032,19 +1080,136 @@ function copyPostLink() {
   closeShare();
 }
 
-// ══ REALTIME — likes en vivo ══
+// ══ PERFIL DE OTRO USUARIO ══
+let currentViewUserId = null;
+let currentViewUserFollowing = false;
+
+async function openUserProfile(userId) {
+  if (userId === ME?.id) { setTab('perfil'); return; } // si es el propio, ir a mi perfil
+  currentViewUserId = userId;
+  document.getElementById('userProfileModal').classList.add('show');
+  document.getElementById('upPosts2').innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted)"><div class="spin" style="margin:0 auto"></div></div>';
+
+  try {
+    // Cargar datos del usuario
+    const { data: u } = await sb.from('tu_usuarios').select('*').eq('id', userId).single();
+    if (!u) { closeUserProfile(); return; }
+
+    const ini = (u.nombre||'?').charAt(0).toUpperCase();
+    const color = COLORS[Math.floor(Math.random()*COLORS.length)];
+
+    // Avatar
+    const avEl = document.getElementById('upAv');
+    avEl.style.background = color;
+    if (u.avatar_url) {
+      avEl.innerHTML = `<img src="${u.avatar_url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent='${ini}'"/>`;
+    } else {
+      avEl.textContent = ini;
+    }
+
+    document.getElementById('upName').textContent = u.nombre||'—';
+    document.getElementById('upGenre').textContent = u.genero_musical||'';
+    document.getElementById('upCity').textContent = u.ciudad ? '📍 '+u.ciudad : '';
+    const tipoEl = document.getElementById('upTipo');
+    tipoEl.textContent = u.tipo_cuenta === 'fan' ? 'FAN' : 'ARTISTA';
+    tipoEl.className = 'p-tipo '+(u.tipo_cuenta==='fan'?'fan':'artista');
+
+    // Cargar posts del usuario
+    const { data: posts } = await sb.from('tu_posts')
+      .select('*, tu_usuarios(nombre,avatar_url,genero_musical,ciudad,tipo_cuenta)')
+      .eq('usuario_id', userId)
+      .order('creado_en', { ascending: false })
+      .limit(10);
+
+    const userPosts = posts||[];
+    document.getElementById('upPosts').textContent = userPosts.length;
+    document.getElementById('upTracks').textContent = userPosts.filter(p=>p.spotify_embed_id).length;
+
+    // Seguidores
+    const { count: segCount } = await sb.from('tu_seguidores').select('*',{count:'exact',head:true}).eq('seguido_id', userId);
+    document.getElementById('upSeg').textContent = segCount||0;
+
+    // ¿Ya sigo a este usuario?
+    const { data: sigData } = await sb.from('tu_seguidores').select('id').eq('seguidor_id', ME.id).eq('seguido_id', userId).single();
+    currentViewUserFollowing = !!sigData;
+    const fbtn = document.getElementById('upFollowBtn');
+    fbtn.textContent = currentViewUserFollowing ? 'Siguiendo' : 'Seguir';
+    fbtn.className = 'follow-big' + (currentViewUserFollowing ? ' following' : '');
+
+    // Posts mini
+    const postsEl = document.getElementById('upPosts2');
+    if (!userPosts.length) {
+      postsEl.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.82rem;padding:1rem">Sin publicaciones aún</div>';
+    } else {
+      postsEl.innerHTML = userPosts.map((p,i) => {
+        const embedHTML = p.spotify_embed_id ? `<div style="border-radius:8px;overflow:hidden;margin-top:.5rem">
+          <iframe src="https://open.spotify.com/embed/${p.spotify_embed_type||'track'}/${p.spotify_embed_id}?utm_source=generator&theme=0"
+            width="100%" height="80" frameBorder="0" loading="lazy" style="border-radius:8px"></iframe></div>` : '';
+        const bodyTxt = p.contenido ? `<div style="font-size:.82rem;color:rgba(240,240,245,.75);line-height:1.5;margin-bottom:.3rem">${formatText(p.contenido)}</div>` : '';
+        return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.75rem;animation:fu .3s ease ${i*.05}s both">
+          <div style="font-size:.68rem;color:var(--muted);margin-bottom:.3rem">${timeAgo(p.creado_en)}</div>
+          ${bodyTxt}${embedHTML}
+          <div style="font-size:.72rem;color:var(--muted);margin-top:.4rem">❤️ ${p.likes_count||0} · 💬 ${p.comentarios_count||0}</div>
+        </div>`;
+      }).join('');
+    }
+  } catch(e) {
+    console.error(e);
+    closeUserProfile();
+  }
+}
+
+function closeUserProfile() {
+  document.getElementById('userProfileModal').classList.remove('show');
+  currentViewUserId = null;
+}
+
+async function toggleFollowUser() {
+  if (!currentViewUserId) return;
+  const btn = document.getElementById('upFollowBtn');
+  const segEl = document.getElementById('upSeg');
+  const cur = parseInt(segEl.textContent)||0;
+
+  if (!currentViewUserFollowing) {
+    await sb.from('tu_seguidores').insert({ seguidor_id: ME.id, seguido_id: currentViewUserId });
+    currentViewUserFollowing = true;
+    btn.textContent = 'Siguiendo';
+    btn.className = 'follow-big following';
+    segEl.textContent = cur+1;
+    toast('✅ Siguiendo','tok');
+  } else {
+    await sb.from('tu_seguidores').delete().eq('seguidor_id', ME.id).eq('seguido_id', currentViewUserId);
+    currentViewUserFollowing = false;
+    btn.textContent = 'Seguir';
+    btn.className = 'follow-big';
+    segEl.textContent = Math.max(0,cur-1);
+    toast('Dejaste de seguir','tok');
+  }
+}
+
+// ══ REALTIME — likes y posts en vivo ══
 function startRealtime() {
-  sb.channel('tu_posts_likes')
+  sb.channel('tu_realtime')
     .on('postgres_changes', {
       event: 'UPDATE', schema: 'public', table: 'tu_posts'
     }, payload => {
       const updated = payload.new;
-      // Actualizar like count en el DOM sin recargar
+      // Actualizar likes en el DOM sin recargar página
       const lcEl = document.querySelector(`#post-${updated.id} .lc`);
       if (lcEl) lcEl.textContent = updated.likes_count||0;
-      // Actualizar en array
+      const ccEl = document.getElementById('cc-'+updated.id);
+      if (ccEl) ccEl.textContent = updated.comentarios_count||0;
+      // Actualizar array local
       const p = allPosts.find(x=>x.id===updated.id);
-      if (p) p.likes_count = updated.likes_count;
+      if (p) { p.likes_count = updated.likes_count; p.comentarios_count = updated.comentarios_count; }
+    })
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'tu_posts'
+    }, payload => {
+      // Nuevo post de otro usuario — recargar feed silenciosamente
+      if (payload.new.usuario_id !== ME?.id) {
+        loadPosts();
+      }
     })
     .subscribe();
 }
@@ -1162,7 +1327,7 @@ function toast(msg,tipo='tok') {
   clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),3000);
 }
 async function doLogout() { await sb.auth.signOut(); window.location.href='register.html'; }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeSpotifyModal(); closeComments(); closeShare(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeSpotifyModal(); closeComments(); closeShare(); closeUserProfile(); } });
 
 init();
 </script>
