@@ -133,6 +133,34 @@ textarea.ctxt::placeholder{color:var(--muted)}
 .modal-input::placeholder{color:#333}
 .modal-err{font-size:.76rem;color:var(--accent2);margin-bottom:.65rem;display:none}
 .modal-err.show{display:block}
+
+/* COMMENTS MODAL */
+.modal-wide{max-width:540px;padding:1.5rem}
+.comments-list{max-height:300px;overflow-y:auto;margin-bottom:1rem;display:flex;flex-direction:column;gap:.65rem}
+.comments-list:empty::after{content:'Sin comentarios aún. Sé el primero.';color:var(--muted);font-size:.8rem;text-align:center;display:block;padding:1.5rem 0}
+.comment-item{display:flex;gap:.6rem;align-items:flex-start}
+.comment-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.8rem;overflow:hidden}
+.comment-av img{width:100%;height:100%;object-fit:cover}
+.comment-body{flex:1;background:var(--surface);border-radius:8px;padding:.5rem .75rem}
+.comment-author{font-size:.75rem;font-weight:700;margin-bottom:.2rem}
+.comment-text{font-size:.82rem;color:rgba(240,240,245,.8);line-height:1.45}
+.comment-time{font-size:.63rem;color:var(--muted);margin-top:.2rem}
+.comment-input-row{display:flex;gap:.5rem}
+.comment-input-row input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem .85rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.84rem;outline:none;transition:border-color .2s}
+.comment-input-row input:focus{border-color:rgba(0,229,255,.25)}
+.comment-input-row input::placeholder{color:var(--muted)}
+.comment-send{padding:.6rem 1rem;border-radius:8px;border:none;background:var(--accent);color:#000;font-weight:700;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .2s}
+.comment-send:hover{background:#00c8e0}
+.comment-del{font-size:.65rem;color:var(--muted);cursor:pointer;background:none;border:none;margin-left:.35rem;transition:color .15s}
+.comment-del:hover{color:var(--accent2)}
+
+/* SHARE MODAL */
+.share-options{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.25rem}
+.share-opt{display:flex;align-items:center;gap:.85rem;padding:.9rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s}
+.share-opt:hover{border-color:rgba(0,229,255,.25);background:rgba(0,229,255,.03)}
+.share-opt-ico{font-size:1.4rem;flex-shrink:0}
+.share-opt-info strong{display:block;font-size:.86rem;font-weight:700;margin-bottom:.15rem}
+.share-opt-info span{font-size:.74rem;color:var(--muted)}
 .modal-btns{display:flex;gap:.6rem}
 .modal-ok{flex:1;padding:.72rem;border-radius:8px;border:none;background:var(--green);color:#fff;font-weight:700;font-size:.84rem;cursor:pointer;transition:all .2s}
 .modal-ok:hover{background:#17a34a}
@@ -455,6 +483,45 @@ textarea.ctxt::placeholder{color:var(--muted)}
 
 <div class="toast" id="toastEl"></div>
 
+<!-- MODAL COMENTARIOS -->
+<div class="modal-overlay" id="commentsModal">
+  <div class="modal modal-wide">
+    <div class="modal-title">💬 Comentarios</div>
+    <div class="comments-list" id="commentsList"></div>
+    <div class="comment-input-row">
+      <input type="text" id="commentInput" placeholder="Escribe un comentario..." maxlength="300" onkeydown="if(event.key==='Enter')sendComment()"/>
+      <button class="comment-send" onclick="sendComment()">Enviar</button>
+    </div>
+    <div style="text-align:right;margin-top:.75rem">
+      <button class="modal-cancel" onclick="closeComments()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL COMPARTIR -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-title">↗️ Compartir</div>
+    <div class="share-options">
+      <div class="share-opt" onclick="repostPost()">
+        <span class="share-opt-ico">🔁</span>
+        <div class="share-opt-info">
+          <strong>Republicar en tu muro</strong>
+          <span>Comparte esta publicación con tus seguidores</span>
+        </div>
+      </div>
+      <div class="share-opt" onclick="copyPostLink()">
+        <span class="share-opt-ico">🔗</span>
+        <div class="share-opt-info">
+          <strong>Copiar enlace</strong>
+          <span>Copia el link directo a esta publicación</span>
+        </div>
+      </div>
+    </div>
+    <button class="modal-cancel" onclick="closeShare()" style="width:100%">Cancelar</button>
+  </div>
+</div>
+
 <script>
 const { createClient } = supabase;
 const sb = createClient('https://hwgwacbmxipzldxusqpb.supabase.co','sb_publishable_YqjmVj7azpmy7JLPABe3FQ_Eb7HUNkS');
@@ -506,6 +573,7 @@ async function init() {
 
   renderProfile();
   await loadPosts();
+  startRealtime();
   document.getElementById('loader').style.display = 'none';
 }
 
@@ -694,8 +762,8 @@ function buildPost(p, i=0) {
     ${bodyHTML}${embedHTML}${collabHTML}
     <div class="post-acts">
       <button class="pact ${p.liked_by_me?'liked':''}" onclick="toggleLike(this,'${p.id}')">❤️ <span class="lc">${p.likes_count||0}</span></button>
-      <button class="pact" onclick="toast('Comentarios próximamente 💬','tok')">💬 ${p.comentarios_count||0}</button>
-      <button class="pact" onclick="sharePost('${p.id}')">↗️ Compartir</button>
+      <button class="pact" onclick="openComments('${p.id}')">💬 <span id="cc-${p.id}">${p.comentarios_count||0}</span></button>
+      <button class="pact" onclick="openShare('${p.id}')">↗️ Compartir</button>
       ${isMine?`<button class="del-btn" onclick="borrarPost('${p.id}')">🗑 Borrar</button>`:''}
     </div></div>`;
 }
@@ -795,25 +863,191 @@ async function publicarPost() {
   btn.disabled = false; btn.textContent = 'Publicar';
 }
 
-// ══ LIKES ══
+// ══ LIKES (con actualización en tiempo real) ══
 async function toggleLike(btn, postId) {
   const isLiked = btn.classList.contains('liked');
   btn.classList.toggle('liked');
   const lcEl = btn.querySelector('.lc');
   const cur = parseInt(lcEl.textContent)||0;
-  lcEl.textContent = isLiked ? Math.max(0,cur-1) : cur+1;
+  const newCount = isLiked ? Math.max(0,cur-1) : cur+1;
+  lcEl.textContent = newCount;
+
+  // Actualizar en el array local también
+  const p = allPosts.find(x=>x.id===postId);
+  if (p) p.likes_count = newCount;
+
   try {
     if (!isLiked) {
       await sb.from('tu_likes').upsert({ post_id:postId, usuario_id:ME.id });
-      await sb.from('tu_posts').update({ likes_count:cur+1 }).eq('id',postId);
     } else {
       await sb.from('tu_likes').delete().eq('post_id',postId).eq('usuario_id',ME.id);
-      await sb.from('tu_posts').update({ likes_count:Math.max(0,cur-1) }).eq('id',postId);
+    }
+    await sb.from('tu_posts').update({ likes_count: newCount }).eq('id',postId);
+  } catch(e) {}
+}
+
+// ══ COMENTARIOS ══
+let currentCommentPostId = null;
+
+async function openComments(postId) {
+  currentCommentPostId = postId;
+  document.getElementById('commentInput').value = '';
+  document.getElementById('commentsList').innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><div class="spin" style="margin:0 auto"></div></div>';
+  document.getElementById('commentsModal').classList.add('show');
+  await loadComments(postId);
+}
+
+function closeComments() {
+  document.getElementById('commentsModal').classList.remove('show');
+  currentCommentPostId = null;
+}
+
+async function loadComments(postId) {
+  try {
+    const { data, error } = await sb.from('tu_comentarios')
+      .select('*, tu_usuarios(nombre, avatar_url)')
+      .eq('post_id', postId)
+      .order('creado_en', { ascending: true });
+
+    if (error) throw error;
+    renderComments(data||[]);
+  } catch(e) {
+    document.getElementById('commentsList').innerHTML = '<div style="color:var(--muted);font-size:.8rem;text-align:center;padding:1rem">Error al cargar comentarios</div>';
+  }
+}
+
+function renderComments(comments) {
+  const el = document.getElementById('commentsList');
+  if (!comments.length) { el.innerHTML = ''; return; }
+  const COLS = ['linear-gradient(135deg,#1a0a2e,#2e0a1a)','linear-gradient(135deg,#0a1a2e,#1a2e0a)','linear-gradient(135deg,#2e1a0a,#0a0a2e)'];
+  el.innerHTML = comments.map((c,i) => {
+    const u = c.tu_usuarios||{};
+    const ini = (u.nombre||'?').charAt(0).toUpperCase();
+    const avHTML = u.avatar_url
+      ? `<div class="comment-av" style="background:${COLS[i%3]}"><img src="${u.avatar_url}" onerror="this.style.display='none'"/></div>`
+      : `<div class="comment-av" style="background:${COLS[i%3]}">${ini}</div>`;
+    const isMine = c.usuario_id === ME?.id;
+    return `<div class="comment-item" id="com-${c.id}">
+      ${avHTML}
+      <div class="comment-body">
+        <div class="comment-author">${u.nombre||'Artista'}${isMine?'<button class="comment-del" onclick="deleteComment(\''+c.id+'\')">✕</button>':''}</div>
+        <div class="comment-text">${formatText(c.contenido)}</div>
+        <div class="comment-time">${timeAgo(c.creado_en)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendComment() {
+  const input = document.getElementById('commentInput');
+  const txt = input.value.trim();
+  if (!txt || !currentCommentPostId) return;
+  input.value = '';
+
+  try {
+    const { error } = await sb.from('tu_comentarios').insert({
+      post_id: currentCommentPostId,
+      usuario_id: ME.id,
+      contenido: txt
+    });
+    if (error) throw error;
+
+    // Incrementar contador
+    const p = allPosts.find(x=>x.id===currentCommentPostId);
+    if (p) {
+      p.comentarios_count = (p.comentarios_count||0)+1;
+      const ccEl = document.getElementById('cc-'+currentCommentPostId);
+      if (ccEl) ccEl.textContent = p.comentarios_count;
+      await sb.from('tu_posts').update({ comentarios_count: p.comentarios_count }).eq('id', currentCommentPostId);
+    }
+    await loadComments(currentCommentPostId);
+  } catch(e) {
+    toast('⚠️ Error al comentar: '+e.message,'terr');
+  }
+}
+
+async function deleteComment(commentId) {
+  try {
+    await sb.from('tu_comentarios').delete().eq('id', commentId).eq('usuario_id', ME.id);
+    document.getElementById('com-'+commentId)?.remove();
+    // Decrementar contador
+    if (currentCommentPostId) {
+      const p = allPosts.find(x=>x.id===currentCommentPostId);
+      if (p) {
+        p.comentarios_count = Math.max(0,(p.comentarios_count||1)-1);
+        const ccEl = document.getElementById('cc-'+currentCommentPostId);
+        if (ccEl) ccEl.textContent = p.comentarios_count;
+        await sb.from('tu_posts').update({ comentarios_count: p.comentarios_count }).eq('id', currentCommentPostId);
+      }
     }
   } catch(e) {}
 }
 
-// ══ BORRAR ══
+// ══ COMPARTIR ══
+let currentSharePostId = null;
+
+function openShare(postId) {
+  currentSharePostId = postId;
+  document.getElementById('shareModal').classList.add('show');
+}
+function closeShare() {
+  document.getElementById('shareModal').classList.remove('show');
+  currentSharePostId = null;
+}
+
+async function repostPost() {
+  if (!currentSharePostId) return;
+  const original = allPosts.find(p=>p.id===currentSharePostId);
+  if (!original) return;
+  closeShare();
+
+  try {
+    const { error } = await sb.from('tu_posts').insert({
+      usuario_id: ME.id,
+      tipo: original.tipo || 'texto',
+      contenido: original.contenido ? '🔁 ' + original.contenido : null,
+      spotify_embed_id: original.spotify_embed_id || null,
+      spotify_embed_type: original.spotify_embed_type || null,
+      es_colaboracion: false,
+      es_repost: true,
+      repost_de: currentSharePostId,
+      likes_count: 0,
+      comentarios_count: 0
+    });
+    if (error) throw error;
+    toast('🔁 ¡Republicado en tu muro!','tok');
+    await loadPosts();
+  } catch(e) {
+    toast('⚠️ Error al republicar: '+e.message,'terr');
+  }
+}
+
+function copyPostLink() {
+  const url = window.location.href.split('#')[0]+'#post-'+currentSharePostId;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url);
+    toast('🔗 Link copiado al portapapeles','tok');
+  }
+  closeShare();
+}
+
+// ══ REALTIME — likes en vivo ══
+function startRealtime() {
+  sb.channel('tu_posts_likes')
+    .on('postgres_changes', {
+      event: 'UPDATE', schema: 'public', table: 'tu_posts'
+    }, payload => {
+      const updated = payload.new;
+      // Actualizar like count en el DOM sin recargar
+      const lcEl = document.querySelector(`#post-${updated.id} .lc`);
+      if (lcEl) lcEl.textContent = updated.likes_count||0;
+      // Actualizar en array
+      const p = allPosts.find(x=>x.id===updated.id);
+      if (p) p.likes_count = updated.likes_count;
+    })
+    .subscribe();
+}
 async function borrarPost(id) {
   if (!confirm('¿Borrar esta publicación?')) return;
   try {
@@ -824,12 +1058,6 @@ async function borrarPost(id) {
     updateCounts();
     toast('🗑 Eliminado','tok');
   } catch(e) { toast('Error al borrar','terr'); }
-}
-
-// ══ COMPARTIR ══
-function sharePost(id) {
-  const url = window.location.href.split('#')[0]+'#post-'+id;
-  if (navigator.clipboard) { navigator.clipboard.writeText(url); toast('🔗 Link copiado','tok'); }
 }
 
 // ══ PERFIL TABS ══
@@ -934,7 +1162,7 @@ function toast(msg,tipo='tok') {
   clearTimeout(tt); tt=setTimeout(()=>el.classList.remove('show'),3000);
 }
 async function doLogout() { await sb.auth.signOut(); window.location.href='register.html'; }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSpotifyModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeSpotifyModal(); closeComments(); closeShare(); } });
 
 init();
 </script>
