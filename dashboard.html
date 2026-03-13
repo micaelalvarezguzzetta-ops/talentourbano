@@ -426,9 +426,26 @@ textarea.ctxt::placeholder{color:var(--muted)}
 
     <!-- MENSAJES -->
     <div id="tab-mensajes" style="display:none">
-      <div class="section-panel">
-        <div class="sp-title">💬 Mensajes</div>
-        <div style="text-align:center;padding:2rem;color:var(--muted);font-size:.85rem">Sistema de mensajes próximamente 🚀</div>
+      <div class="section-panel" style="padding:0;overflow:hidden;display:flex;height:500px">
+        <!-- Lista de conversaciones -->
+        <div id="chatList" style="width:220px;border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0">
+          <div style="padding:.85rem 1rem;border-bottom:1px solid var(--border);font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px">💬 Mensajes</div>
+          <div id="chatConvList" style="flex:1;overflow-y:auto"></div>
+        </div>
+        <!-- Ventana de chat -->
+        <div id="chatWindow" style="flex:1;display:flex;flex-direction:column">
+          <div id="chatWindowHeader" style="padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.65rem;min-height:52px">
+            <div id="chatWindowName" style="font-size:.88rem;font-weight:700;color:var(--muted)">Selecciona una conversación</div>
+          </div>
+          <div id="chatMessages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.65rem"></div>
+          <div id="chatInputRow" style="padding:.75rem;border-top:1px solid var(--border);display:flex;gap:.5rem">
+            <input id="chatInput" type="text" placeholder="Escribe un mensaje..." maxlength="500"
+              style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.84rem;outline:none"
+              onkeydown="if(event.key==='Enter')sendChatMsg()" disabled/>
+            <button onclick="sendChatMsg()" id="chatSendBtn" disabled
+              style="padding:.6rem 1.1rem;border-radius:8px;border:none;background:var(--accent);color:#000;font-weight:700;font-size:.8rem;cursor:pointer">Enviar</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -749,6 +766,13 @@ async function loadPosts() {
       .limit(30);
     if (error) throw error;
     allPosts = data || [];
+
+    // Cargar qué posts le gustan al usuario actual
+    if (ME?.id) {
+      const { data: likes } = await sb.from('tu_likes').select('post_id').eq('usuario_id', ME.id);
+      const likedSet = new Set((likes||[]).map(l=>l.post_id));
+      allPosts.forEach(p => { p.liked_by_me = likedSet.has(p.id); });
+    }
   } catch(e) { allPosts = []; }
 
   myTracks = allPosts.filter(p => p.usuario_id === ME?.id && p.spotify_embed_id);
@@ -799,7 +823,7 @@ function buildPost(p, i=0) {
     <span>🤝</span>
     <div><div style="font-size:.78rem;font-weight:700;color:var(--accent)">Busca colaboración</div>
     <div style="font-size:.68rem;color:var(--muted)">${u.genero_musical||'Música'} · ${u.ciudad||'España'}</div></div>
-    <button class="collab-btn" onclick="toast('Contacto próximamente 💬','tok')">Contactar</button></div>` : '';
+    <button class="collab-btn" onclick="abrirChat('${p.usuario_id}','${nombre.replace(/'/g,"\\'")}')">💬 Contactar</button></div>` : '';
 
   return `<div class="post" id="post-${p.id}" style="animation-delay:${i*.04}s">
     <div class="post-hdr">
@@ -1187,6 +1211,142 @@ async function toggleFollowUser() {
   }
 }
 
+// ══ SISTEMA DE CHAT DIRECTO ══
+let currentChatUserId = null;
+let chatChannel = null;
+
+async function abrirChat(userId, userName) {
+  // Ir a la pestaña de mensajes y abrir chat con este usuario
+  setTab('mensajes');
+  await iniciarConversacion(userId, userName);
+}
+
+async function cargarConversaciones() {
+  const el = document.getElementById('chatConvList');
+  el.innerHTML = '<div style="padding:.75rem;color:var(--muted);font-size:.78rem">Cargando...</div>';
+  try {
+    // Obtener todos los mensajes donde participamos
+    const { data } = await sb.from('tu_mensajes')
+      .select('*, remitente:tu_usuarios!tu_mensajes_remitente_id_fkey(nombre,avatar_url), destinatario:tu_usuarios!tu_mensajes_destinatario_id_fkey(nombre,avatar_url)')
+      .or(`remitente_id.eq.${ME.id},destinatario_id.eq.${ME.id}`)
+      .order('creado_en', { ascending: false });
+
+    if (!data || !data.length) {
+      el.innerHTML = '<div style="padding:1rem;color:var(--muted);font-size:.78rem;text-align:center">Sin conversaciones<br>Contacta a alguien desde el muro</div>';
+      return;
+    }
+
+    // Agrupar por conversación (otro usuario)
+    const seen = new Set();
+    const convs = [];
+    for (const m of data) {
+      const otherId = m.remitente_id === ME.id ? m.destinatario_id : m.remitente_id;
+      const otherUser = m.remitente_id === ME.id ? m.destinatario : m.remitente;
+      if (!seen.has(otherId)) {
+        seen.add(otherId);
+        convs.push({ userId: otherId, nombre: otherUser?.nombre||'Usuario', avatar: otherUser?.avatar_url, lastMsg: m.contenido, time: m.creado_en });
+      }
+    }
+
+    el.innerHTML = convs.map(c => {
+      const ini = (c.nombre||'?').charAt(0).toUpperCase();
+      const avHTML = c.avatar
+        ? `<img src="${c.avatar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`
+        : `<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#007a99);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:#000;flex-shrink:0">${ini}</div>`;
+      const activo = currentChatUserId === c.userId ? 'background:rgba(0,229,255,.07);' : '';
+      return `<div style="display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;cursor:pointer;border-bottom:1px solid var(--border);${activo}transition:background .15s"
+        onclick="iniciarConversacion('${c.userId}','${c.nombre.replace(/'/g,"\\'")}')">
+        ${avHTML}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.nombre}</div>
+          <div style="font-size:.68rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.lastMsg||''}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div style="padding:.75rem;color:var(--muted);font-size:.78rem">Error al cargar</div>';
+  }
+}
+
+async function iniciarConversacion(userId, userName) {
+  currentChatUserId = userId;
+
+  // Actualizar header
+  document.getElementById('chatWindowName').innerHTML = `<span style="color:var(--text)">${userName}</span>`;
+  document.getElementById('chatInput').disabled = false;
+  document.getElementById('chatSendBtn').disabled = false;
+  document.getElementById('chatInput').placeholder = `Mensaje a ${userName}...`;
+  document.getElementById('chatMessages').innerHTML = '<div style="text-align:center;padding:1rem;color:var(--muted)"><div class="spin" style="margin:0 auto"></div></div>';
+
+  await loadMessages();
+  cargarConversaciones(); // refrescar lista
+
+  // Realtime para mensajes nuevos
+  if (chatChannel) { sb.removeChannel(chatChannel); }
+  chatChannel = sb.channel('chat_'+[ME.id, userId].sort().join('_'))
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tu_mensajes' }, payload => {
+      const m = payload.new;
+      if ((m.remitente_id===ME.id && m.destinatario_id===userId) ||
+          (m.remitente_id===userId && m.destinatario_id===ME.id)) {
+        appendMessage(m, m.remitente_id===ME.id);
+      }
+    })
+    .subscribe();
+}
+
+async function loadMessages() {
+  if (!currentChatUserId) return;
+  try {
+    const { data } = await sb.from('tu_mensajes')
+      .select('*')
+      .or(`and(remitente_id.eq.${ME.id},destinatario_id.eq.${currentChatUserId}),and(remitente_id.eq.${currentChatUserId},destinatario_id.eq.${ME.id})`)
+      .order('creado_en', { ascending: true })
+      .limit(50);
+
+    const el = document.getElementById('chatMessages');
+    if (!data || !data.length) {
+      el.innerHTML = '<div style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.8rem">Sin mensajes aún. ¡Di hola!</div>';
+      return;
+    }
+    el.innerHTML = '';
+    data.forEach(m => appendMessage(m, m.remitente_id===ME.id));
+    el.scrollTop = el.scrollHeight;
+  } catch(e) {}
+}
+
+function appendMessage(m, isMine) {
+  const el = document.getElementById('chatMessages');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.style.cssText = `display:flex;justify-content:${isMine?'flex-end':'flex-start'}`;
+  div.innerHTML = `<div style="max-width:70%;background:${isMine?'var(--accent)':'var(--surface)'};color:${isMine?'#000':'var(--text)'};border-radius:${isMine?'12px 12px 2px 12px':'12px 12px 12px 2px'};padding:.55rem .85rem;font-size:.84rem;line-height:1.45;word-break:break-word">
+    ${formatText(m.contenido)}
+    <div style="font-size:.6rem;color:${isMine?'rgba(0,0,0,.5)':'var(--muted)'};margin-top:.25rem;text-align:right">${timeAgo(m.creado_en)}</div>
+  </div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendChatMsg() {
+  const input = document.getElementById('chatInput');
+  const txt = input.value.trim();
+  if (!txt || !currentChatUserId) return;
+  input.value = '';
+
+  try {
+    const { error } = await sb.from('tu_mensajes').insert({
+      remitente_id: ME.id,
+      destinatario_id: currentChatUserId,
+      contenido: txt
+    });
+    if (error) throw error;
+    // El realtime lo mostrará, pero por si acaso también lo añadimos localmente
+    appendMessage({ remitente_id:ME.id, contenido:txt, creado_en:new Date().toISOString() }, true);
+  } catch(e) {
+    toast('⚠️ Error al enviar: '+e.message,'terr');
+  }
+}
+
 // ══ REALTIME — likes y posts en vivo ══
 function startRealtime() {
   sb.channel('tu_realtime')
@@ -1291,6 +1451,7 @@ function setTab(t) {
   const sn = {muro:'snMuro',explorar:'snExplorar',notificaciones:'snNotif',mensajes:'snMsg',perfil:'snPerfil'};
   if (sn[t]) document.getElementById(sn[t])?.classList.add('active');
   if (t==='perfil') showPostsTab();
+  if (t==='mensajes') cargarConversaciones();
 }
 
 function ftab(el, tipo) {
