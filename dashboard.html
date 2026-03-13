@@ -806,6 +806,19 @@ async function loadPosts() {
       const likedSet = new Set((likes||[]).map(l=>l.post_id));
       allPosts.forEach(p => { p.liked_by_me = likedSet.has(p.id); });
     }
+
+    // Sincronizar counts reales de comentarios desde tu_comentarios
+    if (allPosts.length) {
+      const postIds = allPosts.map(p=>p.id);
+      const { data: comCounts } = await sb.from('tu_comentarios')
+        .select('post_id')
+        .in('post_id', postIds);
+      if (comCounts) {
+        const countMap = {};
+        comCounts.forEach(c => { countMap[c.post_id] = (countMap[c.post_id]||0)+1; });
+        allPosts.forEach(p => { p.comentarios_count = countMap[p.id]||0; });
+      }
+    }
   } catch(e) { allPosts = []; }
 
   myTracks = allPosts.filter(p => p.usuario_id === ME?.id && p.spotify_embed_id);
@@ -1101,12 +1114,13 @@ async function deleteComment(commentId) {
     // Decrementar contador
     if (currentCommentPostId) {
       const p = allPosts.find(x=>x.id===currentCommentPostId);
-      if (p) {
-        p.comentarios_count = Math.max(0,(p.comentarios_count||1)-1);
-        const ccEl = document.getElementById('cc-'+currentCommentPostId);
-        if (ccEl) ccEl.textContent = p.comentarios_count;
-        await sb.from('tu_posts').update({ comentarios_count: p.comentarios_count }).eq('id', currentCommentPostId);
-      }
+      const { count } = await sb.from('tu_comentarios')
+        .select('*',{count:'exact',head:true}).eq('post_id', currentCommentPostId);
+      const realCount = count||0;
+      if (p) p.comentarios_count = realCount;
+      const ccEl = document.getElementById('cc-'+currentCommentPostId);
+      if (ccEl) ccEl.textContent = realCount;
+      await sb.from('tu_posts').update({ comentarios_count: realCount }).eq('id', currentCommentPostId);
     }
   } catch(e) {}
 }
@@ -1281,11 +1295,24 @@ async function cargarConversaciones() {
   const el = document.getElementById('chatConvList');
   el.innerHTML = '<div style="padding:.75rem;color:var(--muted);font-size:.78rem">Cargando...</div>';
   try {
-    // Obtener todos los mensajes donde participamos
-    const { data } = await sb.from('tu_mensajes')
-      .select('*, remitente:tu_usuarios!tu_mensajes_remitente_id_fkey(nombre,avatar_url), destinatario:tu_usuarios!tu_mensajes_destinatario_id_fkey(nombre,avatar_url)')
-      .or(`remitente_id.eq.${ME.id},destinatario_id.eq.${ME.id}`)
-      .order('creado_en', { ascending: false });
+    // Obtener mensajes enviados y recibidos por separado (evita problemas FK en plan free)
+    const [sent, recv] = await Promise.all([
+      sb.from('tu_mensajes').select('*').eq('remitente_id', ME.id).order('creado_en', { ascending: false }).limit(200),
+      sb.from('tu_mensajes').select('*').eq('destinatario_id', ME.id).order('creado_en', { ascending: false }).limit(200)
+    ]);
+    const allMsgs = [...(sent.data||[]), ...(recv.data||[])].sort((a,b)=>new Date(b.creado_en)-new Date(a.creado_en));
+    // Obtener info de usuarios involucrados
+    const otherIds = [...new Set(allMsgs.map(m => m.remitente_id===ME.id ? m.destinatario_id : m.remitente_id))];
+    let userMap = {};
+    if (otherIds.length) {
+      const { data: usersData } = await sb.from('tu_usuarios').select('id,nombre,avatar_url').in('id', otherIds);
+      (usersData||[]).forEach(u => userMap[u.id] = u);
+    }
+    const data = allMsgs.map(m => ({
+      ...m,
+      remitente: userMap[m.remitente_id]||null,
+      destinatario: userMap[m.destinatario_id]||null
+    }));
 
     if (!data || !data.length) {
       el.innerHTML = '<div style="padding:1rem;color:var(--muted);font-size:.78rem;text-align:center">Sin conversaciones<br>Contacta a alguien desde el muro</div>';
@@ -1421,13 +1448,11 @@ let allArtistas = [];
 async function cargarExplorar() {
   const grid = document.getElementById('exploreGrid');
   if (!grid) return;
-  // Solo cargar una vez
-  if (allArtistas.length > 0) { renderExploreGrid(allArtistas); return; }
+  allArtistas = []; // siempre recargar frescos
   grid.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--muted);grid-column:1/-1"><div class="spin" style="margin:0 auto"></div></div>';
   try {
     const { data } = await sb.from('tu_usuarios')
       .select('id,nombre,tipo_cuenta,genero_musical,ciudad,avatar_url')
-      .eq('tipo_cuenta','artista')
       .order('creado_en', { ascending: false })
       .limit(100);
     allArtistas = data || [];
