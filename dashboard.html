@@ -3,554 +3,813 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>TALENTOURBANO — Mi perfil</title>
+<title>TALENTOURBANO — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#050508;--surface:#0f0f14;--card:#13131a;
-  --border:#1a1a24;--accent:#00e5ff;--accent2:#ff3366;
-  --text:#f0f0f5;--muted:#5a5a70;
+  --bg:#050508;--surface:#0c0c11;--card:#111118;
+  --border:#1a1a26;--accent:#00e5ff;--accent2:#ff3366;
+  --purple:#a060ff;--text:#f0f0f5;--muted:#55556a;
 }
-body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif}
 
-/* NAV */
+/* ── LOADING ── */
+#loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem;
+}
+.loader-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:5px;color:var(--accent)}
+.loader-bar{width:140px;height:2px;background:var(--border);border-radius:1px;overflow:hidden}
+.loader-fill{height:100%;background:var(--accent);border-radius:1px;animation:lf 1.4s ease forwards}
+@keyframes lf{0%{width:0%}60%{width:80%}100%{width:100%}}
+
+/* ── NAV ── */
 nav{
-  position:sticky;top:0;z-index:100;
-  background:rgba(5,5,8,.9);backdrop-filter:blur(20px);
+  position:fixed;top:0;left:0;right:0;z-index:100;height:56px;
+  background:rgba(5,5,8,.92);backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 2rem;height:58px;
+  display:flex;align-items:center;padding:0 1.5rem;gap:1rem;
 }
 .nav-logo{
-  font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:3px;
-  display:flex;align-items:center;gap:.5rem;text-decoration:none;color:var(--text);
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;
+  display:flex;align-items:center;gap:.45rem;text-decoration:none;color:var(--text);
+  margin-right:1rem;
 }
-.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
-.nav-right{display:flex;align-items:center;gap:1rem}
-.nav-user{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:var(--muted)}
-.nav-avatar{
-  width:32px;height:32px;border-radius:50%;
+.ndot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
+
+/* Nav tabs */
+.nav-tabs{display:flex;gap:.15rem;flex:1}
+.nav-tab{
+  padding:.4rem .9rem;border-radius:6px;font-size:.78rem;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;
+  color:var(--muted);border:none;background:transparent;transition:all .2s;
+  display:flex;align-items:center;gap:.4rem;
+}
+.nav-tab:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.nav-tab.active{color:var(--accent);background:rgba(0,229,255,.07)}
+.nav-tab svg{width:14px;height:14px;flex-shrink:0}
+.nbadge{background:var(--accent2);color:#fff;font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:8px}
+
+.nav-right{display:flex;align-items:center;gap:.75rem;margin-left:auto}
+.nav-user-btn{
+  display:flex;align-items:center;gap:.55rem;
+  background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:8px;padding:.35rem .75rem .35rem .45rem;cursor:pointer;
+  transition:all .2s;
+}
+.nav-user-btn:hover{border-color:rgba(0,229,255,.2)}
+.nav-av{
+  width:28px;height:28px;border-radius:50%;
   background:linear-gradient(135deg,var(--accent),#0088aa);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#000;flex-shrink:0;
+  font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:#000;flex-shrink:0;
 }
-.btn-logout{
-  font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-  padding:.45rem 1rem;border-radius:6px;
-  border:1px solid var(--border);background:transparent;color:var(--muted);
-  cursor:pointer;transition:all .2s;
+.nav-name{font-size:.78rem;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-out{
+  padding:.38rem .85rem;border-radius:6px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:.72rem;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;
 }
-.btn-logout:hover{color:var(--accent2);border-color:var(--accent2)}
+.btn-out:hover{color:var(--accent2);border-color:var(--accent2)}
 
-/* LAYOUT */
-.layout{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;display:grid;grid-template-columns:260px 1fr;gap:1.5rem}
+/* ── LAYOUT ── */
+.page{
+  margin-top:56px;
+  max-width:1200px;margin-left:auto;margin-right:auto;
+  display:grid;grid-template-columns:240px 1fr 260px;
+  gap:1.25rem;padding:1.5rem 1.25rem;min-height:calc(100vh - 56px);
+}
 
-/* SIDEBAR */
-.sidebar{display:flex;flex-direction:column;gap:1rem}
-.profile-card{
+/* ── SIDEBAR IZQ ── */
+.sidebar-l{position:sticky;top:68px;height:fit-content;display:flex;flex-direction:column;gap:1rem}
+
+.profile-box{
   background:var(--card);border:1px solid var(--border);border-radius:14px;
-  padding:1.5rem;text-align:center;position:relative;overflow:hidden;
+  padding:1.4rem;text-align:center;position:relative;overflow:hidden;
 }
-.profile-card::before{
-  content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);
-  width:200px;height:200px;border-radius:50%;
-  background:radial-gradient(circle,rgba(0,229,255,.08) 0%,transparent 70%);
-  pointer-events:none;
+.profile-box::before{
+  content:'';position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,229,255,.07) 0%,transparent 70%);pointer-events:none;
 }
-.profile-avatar{
-  width:72px;height:72px;border-radius:50%;
-  background:linear-gradient(135deg,var(--accent),#0088aa);
+.pav{
+  width:68px;height:68px;border-radius:50%;margin:0 auto .9rem;
+  background:linear-gradient(135deg,var(--accent),#007a99);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#000;
-  margin:0 auto 1rem;border:3px solid rgba(0,229,255,.2);
+  font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#000;
+  border:2px solid rgba(0,229,255,.2);position:relative;
 }
-.profile-name{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:1px;margin-bottom:.2rem}
-.profile-genre{font-size:.75rem;color:var(--accent);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}
-.profile-city{font-size:.75rem;color:var(--muted)}
-.profile-plan{
-  display:inline-flex;align-items:center;gap:.3rem;
-  margin-top:.75rem;font-size:.68rem;font-weight:700;letter-spacing:.1em;
-  padding:.25rem .75rem;border-radius:20px;
+.pav-fan{background:linear-gradient(135deg,var(--purple),#6030aa)}
+.pav-badge{
+  position:absolute;bottom:-2px;right:-2px;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--card);
+  display:flex;align-items:center;justify-content:center;font-size:.55rem;
 }
-.plan-free{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid rgba(0,229,255,.2)}
-.plan-premium{background:rgba(255,51,102,.1);color:var(--accent2);border:1px solid rgba(255,51,102,.2)}
+.pav-badge.fan-badge{background:var(--purple)}
+.p-name{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;margin-bottom:.15rem}
+.p-tipo{
+  display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.2rem .6rem;border-radius:20px;margin-bottom:.25rem;
+}
+.p-tipo.artista{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid rgba(0,229,255,.2)}
+.p-tipo.fan{background:rgba(160,96,255,.1);color:var(--purple);border:1px solid rgba(160,96,255,.2)}
+.p-genre{font-size:.73rem;color:var(--muted);margin-bottom:.15rem}
+.p-city{font-size:.72rem;color:var(--muted)}
+.p-stats{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.9rem}
+.ps{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.5rem;text-align:center}
+.ps-n{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:var(--accent)}
+.ps-l{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
 
-.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:1rem}
-.pstat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem;text-align:center}
-.pstat-n{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--accent)}
-.pstat-l{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+.side-nav{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.6rem}
+.sn-item{
+  display:flex;align-items:center;gap:.65rem;
+  padding:.6rem .7rem;border-radius:8px;
+  font-size:.83rem;cursor:pointer;transition:all .15s;
+  color:var(--text);text-decoration:none;margin-bottom:1px;border:none;background:transparent;width:100%;text-align:left;
+}
+.sn-item:hover{background:var(--surface)}
+.sn-item.active{background:rgba(0,229,255,.07);color:var(--accent)}
+.sn-ico{font-size:.95rem;width:18px;text-align:center;flex-shrink:0}
+.sn-badge{margin-left:auto;background:var(--accent2);color:#fff;font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:8px}
 
-/* MENU */
-.side-menu{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.75rem}
-.menu-item{
-  display:flex;align-items:center;gap:.7rem;
-  padding:.65rem .75rem;border-radius:8px;
-  font-size:.85rem;cursor:pointer;transition:all .15s;
-  text-decoration:none;color:var(--text);margin-bottom:2px;
-}
-.menu-item:hover{background:var(--surface)}
-.menu-item.active{background:rgba(0,229,255,.08);color:var(--accent)}
-.menu-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
-.menu-badge{
-  margin-left:auto;background:var(--accent2);color:#fff;
-  font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:10px;
-}
+/* ── FEED CENTRAL ── */
+.feed{display:flex;flex-direction:column;gap:1rem}
 
-/* MAIN */
-.main{display:flex;flex-direction:column;gap:1.25rem}
-
-/* WELCOME BANNER */
-.welcome-banner{
-  background:linear-gradient(135deg,rgba(0,229,255,.06) 0%,rgba(255,51,102,.04) 100%);
-  border:1px solid rgba(0,229,255,.12);border-radius:14px;
-  padding:1.5rem 1.75rem;
-  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+/* Crear post */
+.create-box{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:1.1rem;
 }
-.wb-title{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:1px;margin-bottom:.2rem}
-.wb-sub{font-size:.82rem;color:var(--muted);line-height:1.5}
-.wb-btn{
-  flex-shrink:0;padding:.65rem 1.4rem;border-radius:8px;border:none;
-  background:var(--accent);color:#000;font-family:'Space Grotesk',sans-serif;
-  font-size:.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
-  cursor:pointer;white-space:nowrap;transition:all .2s;
-}
-.wb-btn:hover{background:#00c8e0;transform:translateY(-1px)}
-
-/* QUICK ACTIONS */
-.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}
-.qa{
-  background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:1rem;text-align:center;cursor:pointer;transition:all .2s;
-}
-.qa:hover{border-color:rgba(0,229,255,.2);transform:translateY(-2px)}
-.qa-icon{font-size:1.5rem;margin-bottom:.5rem}
-.qa-label{font-size:.75rem;font-weight:600;color:var(--muted)}
-
-/* FEED CREATE */
-.post-create{
-  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.1rem;
-  display:flex;gap:.85rem;
-}
-.post-avatar{
-  width:38px;height:38px;border-radius:50%;flex-shrink:0;
-  background:linear-gradient(135deg,var(--accent),#0088aa);
+.create-top{display:flex;gap:.8rem;align-items:flex-start;margin-bottom:.85rem}
+.create-av{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),#007a99);
   display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:1rem;color:#000;
+  font-family:'Bebas Neue',sans-serif;font-size:.9rem;color:#000;
 }
-.post-input-wrap{flex:1}
-.post-input{
-  width:100%;background:transparent;border:none;color:var(--text);
-  font-family:'Space Grotesk',sans-serif;font-size:.88rem;
-  outline:none;resize:none;line-height:1.5;
+.create-av.fan-av{background:linear-gradient(135deg,var(--purple),#6030aa)}
+textarea.ctxt{
+  flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:.7rem .9rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.86rem;
+  outline:none;resize:none;line-height:1.5;transition:border-color .2s;min-height:70px;
 }
-.post-input::placeholder{color:var(--muted)}
-.post-toolbar{display:flex;gap:.5rem;margin-top:.75rem;align-items:center;flex-wrap:wrap}
-.post-tool{
-  display:flex;align-items:center;gap:.3rem;
-  font-size:.72rem;color:var(--muted);
-  padding:.35rem .7rem;border-radius:6px;
-  background:var(--surface);border:1px solid var(--border);
+textarea.ctxt:focus{border-color:rgba(255,255,255,.15)}
+textarea.ctxt::placeholder{color:var(--muted)}
+.create-bar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.ctool{
+  display:flex;align-items:center;gap:.3rem;font-size:.71rem;color:var(--muted);
+  padding:.32rem .65rem;border-radius:6px;background:var(--surface);border:1px solid var(--border);
   cursor:pointer;transition:all .15s;
 }
-.post-tool:hover{color:var(--accent);border-color:rgba(0,229,255,.2)}
-.post-send{
-  margin-left:auto;padding:.4rem 1.1rem;border-radius:6px;border:none;
-  background:var(--accent);color:#000;font-weight:700;font-size:.78rem;
-  cursor:pointer;transition:all .2s;
+.ctool:hover{color:var(--accent);border-color:rgba(0,229,255,.2)}
+.ctool.disabled-tool{opacity:.35;cursor:not-allowed}
+.ctool.disabled-tool:hover{color:var(--muted);border-color:var(--border)}
+.cpub{
+  margin-left:auto;padding:.38rem 1.1rem;border-radius:6px;border:none;
+  background:var(--accent);color:#000;font-weight:700;font-size:.77rem;
+  letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .2s;
 }
-.post-send:hover{background:#00c8e0}
+.cpub:hover{background:#00c8e0}
+.cpub:disabled{opacity:.4;cursor:not-allowed}
 
-/* CARDS SECTION */
-.section-title{
-  font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:1px;
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:1rem;
+/* Fan notice */
+.fan-notice{
+  background:rgba(160,96,255,.05);border:1px solid rgba(160,96,255,.15);
+  border-radius:10px;padding:.7rem 1rem;
+  font-size:.78rem;color:rgba(160,96,255,.8);
+  display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem;
 }
-.section-link{font-family:'Space Grotesk',sans-serif;font-size:.72rem;color:var(--accent);cursor:pointer;font-weight:500}
 
-/* POST CARD */
-.post-card{
-  background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:1.1rem;margin-bottom:.75rem;transition:border-color .2s;
-  animation:fadeUp .4s ease both;
+/* Tabs feed */
+.feed-tabs{display:flex;gap:2px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:.25rem}
+.ftab{flex:1;padding:.5rem;border-radius:7px;font-size:.75rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:all .2s}
+.ftab.active{background:var(--accent);color:#000}
+
+/* Post card */
+.post{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:1.1rem;transition:border-color .2s;
+  animation:fu .35s ease both;
 }
-.post-card:hover{border-color:#252530}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.pc-header{display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem}
-.pc-avatar{
-  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+.post:hover{border-color:#222232}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.post-hdr{display:flex;align-items:center;gap:.65rem;margin-bottom:.85rem}
+.post-av{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;font-size:.95rem;
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;
 }
-.pc-info{flex:1;min-width:0}
-.pc-name{font-size:.85rem;font-weight:600}
-.pc-meta{font-size:.7rem;color:var(--muted);margin-top:1px}
-.pc-time{font-size:.7rem;color:var(--muted)}
-.pc-text{font-size:.86rem;color:rgba(240,240,245,.7);line-height:1.6;margin-bottom:.9rem}
-.pc-tag{color:var(--accent);cursor:pointer}
-.pc-actions{display:flex;gap:1.25rem;padding-top:.75rem;border-top:1px solid var(--border)}
-.pc-btn{
-  display:flex;align-items:center;gap:.35rem;
-  font-size:.76rem;color:var(--muted);cursor:pointer;
-  background:none;border:none;transition:color .15s;
-}
-.pc-btn:hover{color:var(--text)}
-.pc-btn.liked{color:var(--accent2)}
+.post-meta{flex:1;min-width:0}
+.post-author{font-size:.86rem;font-weight:700;display:flex;align-items:center;gap:.35rem}
+.post-verified{width:14px;height:14px;background:var(--accent3, #00e5ff);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.post-info{font-size:.7rem;color:var(--muted);margin-top:1px}
+.post-time{font-size:.68rem;color:var(--muted);white-space:nowrap}
+.post-body{font-size:.85rem;color:rgba(240,240,245,.75);line-height:1.65;margin-bottom:.9rem}
+.post-tag{color:var(--accent);cursor:pointer}
+.post-tag:hover{text-decoration:underline}
 
-/* TRACK PLAYER */
-.track-box{
+/* Track embed */
+.track-embed{
   background:var(--surface);border:1px solid var(--border);border-radius:10px;
-  padding:.9rem;display:flex;gap:.85rem;align-items:center;margin-bottom:.9rem;
+  padding:.85rem;display:flex;gap:.85rem;align-items:center;margin-bottom:.9rem;
 }
-.track-cover{
-  width:48px;height:48px;border-radius:8px;flex-shrink:0;
-  background:linear-gradient(135deg,#1a0a2e,#0a1a2e);
+.te-cover{
+  width:46px;height:46px;border-radius:8px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;font-size:1.2rem;
 }
-.track-info{flex:1;min-width:0}
-.track-title{font-size:.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.track-artist{font-size:.72rem;color:var(--muted);margin-top:2px}
-.waveform{width:100%;height:24px;display:flex;align-items:center;gap:1.5px;margin-top:.45rem;cursor:pointer}
-.wb{flex:1;background:var(--border);border-radius:2px;transition:background .1s}
-.wb.p{background:var(--accent)}
-.play-btn{
-  width:34px;height:34px;border-radius:50%;border:none;
+.te-info{flex:1;min-width:0}
+.te-title{font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.te-artist{font-size:.7rem;color:var(--muted);margin-top:1px}
+.wf{width:100%;height:22px;display:flex;align-items:center;gap:1.5px;margin-top:.45rem;cursor:pointer}
+.wfb{flex:1;background:rgba(255,255,255,.08);border-radius:2px;transition:background .1s}
+.wfb.wp{background:var(--accent)}
+.play-circle{
+  width:32px;height:32px;border-radius:50%;border:none;
   background:var(--accent);display:flex;align-items:center;justify-content:center;
   cursor:pointer;flex-shrink:0;transition:transform .15s;
 }
-.play-btn:hover{transform:scale(1.08)}
+.play-circle:hover{transform:scale(1.1)}
 
-/* EMPTY STATE */
-.empty{
-  background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:2rem;text-align:center;color:var(--muted);
+/* Collab tag */
+.collab-tag{
+  background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.1);
+  border-radius:8px;padding:.65rem .9rem;margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.7rem;
 }
-.empty-icon{font-size:2rem;margin-bottom:.5rem}
-.empty-text{font-size:.85rem}
+.collab-tag-btn{
+  margin-left:auto;flex-shrink:0;font-size:.7rem;font-weight:700;
+  padding:.28rem .75rem;border-radius:20px;border:1px solid var(--accent);
+  background:transparent;color:var(--accent);cursor:pointer;transition:all .15s;
+}
+.collab-tag-btn:hover{background:rgba(0,229,255,.1)}
 
-/* TOAST */
+/* Post actions */
+.post-acts{display:flex;gap:1.25rem;padding-top:.75rem;border-top:1px solid var(--border)}
+.pact{
+  display:flex;align-items:center;gap:.35rem;font-size:.75rem;
+  color:var(--muted);cursor:pointer;background:none;border:none;transition:color .15s;
+}
+.pact:hover{color:var(--text)}
+.pact.liked{color:var(--accent2)}
+.pact svg{width:15px;height:15px;flex-shrink:0}
+
+/* Mi post (subido por el usuario actual) */
+.my-post-tag{
+  font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);border:1px solid rgba(0,229,255,.2);
+  padding:.15rem .5rem;border-radius:20px;margin-left:auto;
+}
+
+/* Empty */
+.empty-state{
+  background:var(--card);border:1px dashed var(--border);border-radius:14px;
+  padding:2.5rem;text-align:center;
+}
+.es-icon{font-size:2.5rem;margin-bottom:.75rem}
+.es-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:1px;margin-bottom:.4rem}
+.es-sub{font-size:.82rem;color:var(--muted);line-height:1.5}
+
+/* ── SIDEBAR DER ── */
+.sidebar-r{position:sticky;top:68px;height:fit-content;display:flex;flex-direction:column;gap:1rem}
+
+.widget{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem}
+.widget-title{
+  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;
+  margin-bottom:.85rem;display:flex;align-items:center;justify-content:space-between;
+}
+.widget-more{font-family:'Space Grotesk',sans-serif;font-size:.68rem;color:var(--accent);cursor:pointer;font-weight:500;letter-spacing:.05em}
+
+/* Artista sugerido */
+.sugg-row{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--border)}
+.sugg-row:last-child{border-bottom:none}
+.sugg-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.9rem;flex-shrink:0}
+.sugg-info{flex:1;min-width:0}
+.sugg-name{font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sugg-genre{font-size:.68rem;color:var(--muted)}
+.follow-btn{font-size:.68rem;font-weight:700;padding:.25rem .65rem;border-radius:20px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;transition:all .15s;flex-shrink:0}
+.follow-btn:hover,.follow-btn.following{background:var(--accent);color:#000}
+
+/* Trending */
+.trend-item{padding:.45rem 0;border-bottom:1px solid var(--border);cursor:pointer}
+.trend-item:last-child{border-bottom:none}
+.trend-item:hover .trend-tag{color:var(--accent)}
+.trend-num{font-size:.62rem;color:var(--muted);font-family:monospace}
+.trend-tag{font-size:.82rem;font-weight:700;transition:color .15s}
+.trend-count{font-size:.67rem;color:var(--muted)}
+
+/* ── TOAST ── */
 .toast{
   position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;
   background:var(--card);border:1px solid var(--border);border-radius:10px;
-  padding:.75rem 1.25rem;font-size:.82rem;
+  padding:.7rem 1.2rem;font-size:.82rem;
   display:none;align-items:center;gap:.6rem;
-  box-shadow:0 8px 32px rgba(0,0,0,.4);
-  animation:slideUp .3s ease;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);animation:fu .3s ease;
 }
 .toast.show{display:flex}
-.toast.success{border-color:rgba(0,229,255,.2);color:var(--accent)}
-@keyframes slideUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.toast.tok{border-color:rgba(0,229,255,.2);color:var(--accent)}
+.toast.terr{border-color:rgba(255,51,102,.2);color:var(--accent2)}
 
-/* Loading screen */
-#loading{
-  position:fixed;inset:0;background:var(--bg);
-  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;
-  z-index:9999;
-}
-.loading-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:4px;color:var(--accent)}
-.loading-bar{width:120px;height:2px;background:var(--border);border-radius:1px;overflow:hidden}
-.loading-fill{width:0%;height:100%;background:var(--accent);animation:load 1.2s ease forwards}
-@keyframes load{to{width:100%}}
+/* ── SPINNER ── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,229,255,.2);border-top-color:var(--accent);border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
 
-@media(max-width:800px){
-  .layout{grid-template-columns:1fr}
-  .sidebar{display:none}
-  .quick-actions{grid-template-columns:repeat(2,1fr)}
-}
+/* ── RESPONSIVE ── */
+@media(max-width:1000px){.page{grid-template-columns:200px 1fr}.sidebar-r{display:none}}
+@media(max-width:700px){.page{grid-template-columns:1fr;padding:.75rem}.sidebar-l{display:none}.nav-tabs{display:none}}
 </style>
 </head>
 <body>
 
-<!-- Loading -->
-<div id="loading">
-  <div class="loading-logo">⬡ TALENTOURBANO</div>
-  <div class="loading-bar"><div class="loading-fill"></div></div>
+<div id="loader">
+  <div class="loader-logo">⬡ TALENTOURBANO</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
 </div>
 
 <!-- NAV -->
 <nav>
-  <a class="nav-logo" href="index.html">
-    <span class="logo-dot"></span>TALENTOURBANO
-  </a>
+  <a class="nav-logo" href="index.html"><span class="ndot"></span>TU</a>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="setTab('muro')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Muro
+    </button>
+    <button class="nav-tab" onclick="setTab('explorar')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+      Explorar
+    </button>
+    <button class="nav-tab" onclick="toast('Notificaciones próximamente 🔔','tok')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+      Notificaciones
+      <span class="nbadge">3</span>
+    </button>
+    <button class="nav-tab" onclick="toast('Mensajes próximamente 💬','tok')">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+      Mensajes
+    </button>
+  </div>
   <div class="nav-right">
-    <div class="nav-user">
-      <div class="nav-avatar" id="navAvatar">?</div>
-      <span id="navName">Cargando...</span>
+    <div class="nav-user-btn" onclick="setTab('perfil')">
+      <div class="nav-av" id="navAv">?</div>
+      <span class="nav-name" id="navNm">...</span>
     </div>
-    <button class="btn-logout" onclick="logout()">Salir</button>
+    <button class="btn-out" onclick="doLogout()">Salir</button>
   </div>
 </nav>
 
-<div class="layout">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="profile-card">
-      <div class="profile-avatar" id="profAvatar">?</div>
-      <div class="profile-name" id="profName">—</div>
-      <div class="profile-genre" id="profGenre">—</div>
-      <div class="profile-city" id="profCity">—</div>
-      <div class="profile-plan plan-free" id="profPlan">● PLAN GRATUITO</div>
-      <div class="profile-stats">
-        <div class="pstat"><div class="pstat-n">0</div><div class="pstat-l">Seguidores</div></div>
-        <div class="pstat"><div class="pstat-n">0</div><div class="pstat-l">Siguiendo</div></div>
-        <div class="pstat"><div class="pstat-n">0</div><div class="pstat-l">Posts</div></div>
-        <div class="pstat"><div class="pstat-n">0</div><div class="pstat-l">Tracks</div></div>
+<div class="page">
+
+  <!-- SIDEBAR IZQ -->
+  <aside class="sidebar-l">
+    <div class="profile-box">
+      <div class="pav" id="profAv">
+        <span id="profAvTxt">?</span>
+        <div class="pav-badge" id="profBadge">🎤</div>
+      </div>
+      <div class="p-name" id="profName">—</div>
+      <div class="p-tipo artista" id="profTipo">ARTISTA</div>
+      <div class="p-genre" id="profGenre"></div>
+      <div class="p-city" id="profCity"></div>
+      <div class="p-stats">
+        <div class="ps"><div class="ps-n">0</div><div class="ps-l">Seguidores</div></div>
+        <div class="ps"><div class="ps-n">0</div><div class="ps-l">Siguiendo</div></div>
+        <div class="ps"><div class="ps-n" id="psPostCount">0</div><div class="ps-l">Posts</div></div>
+        <div class="ps"><div class="ps-n">0</div><div class="ps-l">Tracks</div></div>
       </div>
     </div>
-
-    <div class="side-menu">
-      <a href="#" class="menu-item active">
-        <span class="menu-icon">🏠</span> Inicio
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-icon">🔍</span> Explorar
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-icon">🔔</span> Notificaciones
-        <span class="menu-badge">3</span>
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-icon">💬</span> Mensajes
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-icon">🎵</span> Mi Música
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-icon">🤝</span> Colaborar
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-icon">📅</span> Eventos
-      </a>
-      <a href="#" class="menu-item">
-        <span class="menu-icon">⚙️</span> Ajustes
-      </a>
+    <div class="side-nav">
+      <button class="sn-item active" onclick="setTab('muro')"><span class="sn-ico">🏠</span>Muro</button>
+      <button class="sn-item" onclick="setTab('explorar')"><span class="sn-ico">🔍</span>Explorar</button>
+      <button class="sn-item" onclick="toast('Próximamente 🔔','tok')"><span class="sn-ico">🔔</span>Notificaciones<span class="sn-badge">3</span></button>
+      <button class="sn-item" onclick="toast('Próximamente 💬','tok')"><span class="sn-ico">💬</span>Mensajes</button>
+      <button class="sn-item" id="snMusica" onclick="toast('Próximamente 🎵','tok')"><span class="sn-ico">🎵</span>Mi Música</button>
+      <button class="sn-item" id="snColabo" onclick="toast('Próximamente 🤝','tok')"><span class="sn-ico">🤝</span>Colaborar</button>
+      <button class="sn-item" onclick="toast('Próximamente 📅','tok')"><span class="sn-ico">📅</span>Eventos</button>
+      <button class="sn-item" onclick="setTab('perfil')"><span class="sn-ico">👤</span>Mi Perfil</button>
     </div>
   </aside>
 
-  <!-- MAIN -->
-  <main class="main">
+  <!-- FEED / MURO -->
+  <main class="feed" id="mainFeed">
 
-    <!-- WELCOME -->
-    <div class="welcome-banner">
-      <div>
-        <div class="wb-title">¡BIENVENIDO/A, <span id="wbName">ARTISTA</span>! 🎤</div>
-        <div class="wb-sub">Tu perfil está listo. Comparte tu música y conecta con otros artistas.</div>
+    <!-- Crear post -->
+    <div class="create-box" id="createBox">
+      <div class="create-top">
+        <div class="create-av" id="createAv">?</div>
+        <textarea class="ctxt" id="postTxt" placeholder="¿Qué estás creando hoy? Comparte un track, una idea, busca colabo..."></textarea>
       </div>
-      <button class="wb-btn" onclick="showToast('¡Función próximamente disponible! 🚀')">Subir track</button>
-    </div>
-
-    <!-- ACCIONES RÁPIDAS -->
-    <div class="quick-actions">
-      <div class="qa" onclick="showToast('¡Función próximamente! 🎵')">
-        <div class="qa-icon">🎵</div>
-        <div class="qa-label">Subir música</div>
-      </div>
-      <div class="qa" onclick="showToast('¡Función próximamente! 🤝')">
-        <div class="qa-icon">🤝</div>
-        <div class="qa-label">Buscar colabo</div>
-      </div>
-      <div class="qa" onclick="showToast('¡Función próximamente! 📅')">
-        <div class="qa-icon">📅</div>
-        <div class="qa-label">Crear evento</div>
-      </div>
-      <div class="qa" onclick="showToast('¡Función próximamente! 📊')">
-        <div class="qa-icon">📊</div>
-        <div class="qa-label">Mis estadísticas</div>
+      <div class="create-bar" id="createBar">
+        <div class="ctool" id="toolMusica" onclick="toast('Subir música próximamente 🎵','tok')">🎵 Música</div>
+        <div class="ctool" id="toolImagen" onclick="toast('Subir imagen próximamente 🖼️','tok')">🖼️ Imagen</div>
+        <div class="ctool" id="toolEvento" onclick="toast('Crear evento próximamente 📅','tok')">📅 Evento</div>
+        <div class="ctool" id="toolColabo" onclick="toast('Buscar colabo próximamente 🤝','tok')">🤝 Colabo</div>
+        <button class="cpub" id="btnPub" onclick="publicarPost()">Publicar</button>
       </div>
     </div>
 
-    <!-- CREAR POST -->
-    <div class="post-create">
-      <div class="post-avatar" id="postAvatar">?</div>
-      <div class="post-input-wrap">
-        <textarea class="post-input" id="postText" rows="2" placeholder="¿Qué estás creando hoy? Comparte un track, una idea, busca colabo..."></textarea>
-        <div class="post-toolbar">
-          <div class="post-tool" onclick="showToast('Adjunta tu música 🎵')">🎵 Música</div>
-          <div class="post-tool" onclick="showToast('Añade una imagen 🖼️')">🖼️ Imagen</div>
-          <div class="post-tool" onclick="showToast('Crea un evento 📅')">📅 Evento</div>
-          <button class="post-send" onclick="sendPost()">Publicar</button>
-        </div>
-      </div>
+    <!-- Tabs feed -->
+    <div class="feed-tabs">
+      <button class="ftab active" onclick="ftab(this,'todos')">Para ti</button>
+      <button class="ftab" onclick="ftab(this,'artistas')">Artistas</button>
+      <button class="ftab" onclick="ftab(this,'colaborar')">Colaborar</button>
     </div>
 
-    <!-- FEED -->
-    <div>
-      <div class="section-title">
-        Últimas publicaciones
-        <span class="section-link" onclick="showToast('Cargando más posts...')">Ver todos</span>
-      </div>
-
-      <!-- Post 1 -->
-      <div class="post-card">
-        <div class="pc-header">
-          <div class="pc-avatar" style="background:linear-gradient(135deg,#1a0a2e,#2e0a1a)">MK</div>
-          <div class="pc-info">
-            <div class="pc-name">Mikael Keys</div>
-            <div class="pc-meta">📍 Madrid · Trap / R&B</div>
-          </div>
-          <span class="pc-time">hace 20 min</span>
-        </div>
-        <div class="track-box">
-          <div class="track-cover">🎵</div>
-          <div class="track-info">
-            <div class="track-title">Noche Sin Fin</div>
-            <div class="track-artist">Mikael Keys · 3:42</div>
-            <div class="waveform" id="wf1"></div>
-          </div>
-          <button class="play-btn" onclick="togglePlay(this)">
-            <svg width="12" height="12" fill="#000" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-        </div>
-        <p class="pc-text">Nuevo single ya disponible 🔥 3 meses en el estudio para esto. <span class="pc-tag">#trap</span> <span class="pc-tag">#nuevamusica</span></p>
-        <div class="pc-actions">
-          <button class="pc-btn" onclick="this.classList.toggle('liked')">❤️ 2.1K</button>
-          <button class="pc-btn">💬 87</button>
-          <button class="pc-btn">↗️ Compartir</button>
-        </div>
-      </div>
-
-      <!-- Post 2 -->
-      <div class="post-card" style="animation-delay:.08s">
-        <div class="pc-header">
-          <div class="pc-avatar" style="background:linear-gradient(135deg,#0a1a2e,#1a2e0a)">AV</div>
-          <div class="pc-info">
-            <div class="pc-name">Ana Vidal</div>
-            <div class="pc-meta">📍 Barcelona · Dream Pop</div>
-          </div>
-          <span class="pc-time">hace 1h</span>
-        </div>
-        <p class="pc-text">Buscando productor para mi EP 🎹 ¿Alguien trabaja Dream Pop con toques electrónicos? DM abierto. <span class="pc-tag">#colaboracion</span> <span class="pc-tag">#productor</span></p>
-        <div style="background:rgba(0,229,255,.04);border:1px solid rgba(0,229,255,.1);border-radius:8px;padding:.7rem 1rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.7rem">
-          <span style="font-size:1.1rem">🤝</span>
-          <div>
-            <div style="font-size:.8rem;font-weight:600;color:var(--accent)">Busca colaboración</div>
-            <div style="font-size:.7rem;color:var(--muted)">Productor · EP · Dream Pop · Barcelona o remoto</div>
-          </div>
-          <button onclick="showToast('¡Contacto próximamente! 💬')" style="margin-left:auto;font-size:.72rem;font-weight:700;padding:.3rem .8rem;border-radius:20px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer">Contactar</button>
-        </div>
-        <div class="pc-actions">
-          <button class="pc-btn" onclick="this.classList.toggle('liked')">❤️ 342</button>
-          <button class="pc-btn">💬 54</button>
-          <button class="pc-btn">↗️ Compartir</button>
-        </div>
-      </div>
-
-      <!-- Post 3 -->
-      <div class="post-card" style="animation-delay:.16s">
-        <div class="pc-header">
-          <div class="pc-avatar" style="background:linear-gradient(135deg,#2e1a0a,#0a0a2e)">DJ</div>
-          <div class="pc-info">
-            <div class="pc-name">DJ Nomad</div>
-            <div class="pc-meta">📍 Valencia · Electronic</div>
-          </div>
-          <span class="pc-time">hace 3h</span>
-        </div>
-        <p class="pc-text">Esta noche en Sala Planta Baja 🔊 Set con tracks inéditos. 23h, entradas en puerta. <span class="pc-tag">#directo</span> <span class="pc-tag">#Valencia</span></p>
-        <div class="pc-actions">
-          <button class="pc-btn" onclick="this.classList.toggle('liked')">❤️ 1.7K</button>
-          <button class="pc-btn">💬 203</button>
-          <button class="pc-btn" style="color:var(--accent2)">📅 Me apunto</button>
-        </div>
+    <!-- Posts container -->
+    <div id="postsContainer">
+      <div style="text-align:center;padding:2rem;color:var(--muted)">
+        <div class="spin" style="margin:0 auto .75rem"></div>
+        <div style="font-size:.82rem">Cargando publicaciones...</div>
       </div>
     </div>
 
   </main>
+
+  <!-- SIDEBAR DER -->
+  <aside class="sidebar-r">
+
+    <!-- Artistas sugeridos -->
+    <div class="widget">
+      <div class="widget-title">Artistas sugeridos <span class="widget-more">Ver todos</span></div>
+      <div class="sugg-row">
+        <div class="sugg-av" style="background:linear-gradient(135deg,#1a0a2e,#2e0a1a)">MK</div>
+        <div class="sugg-info"><div class="sugg-name">Mikael Keys</div><div class="sugg-genre">Trap · Madrid</div></div>
+        <button class="follow-btn" onclick="toggleFollow(this)">Seguir</button>
+      </div>
+      <div class="sugg-row">
+        <div class="sugg-av" style="background:linear-gradient(135deg,#0a1a2e,#1a2e0a)">AV</div>
+        <div class="sugg-info"><div class="sugg-name">Ana Vidal</div><div class="sugg-genre">Dream Pop · Bcn</div></div>
+        <button class="follow-btn" onclick="toggleFollow(this)">Seguir</button>
+      </div>
+      <div class="sugg-row">
+        <div class="sugg-av" style="background:linear-gradient(135deg,#2e1a0a,#0a0a2e)">DJ</div>
+        <div class="sugg-info"><div class="sugg-name">DJ Nomad</div><div class="sugg-genre">Electronic · Vlc</div></div>
+        <button class="follow-btn following" onclick="toggleFollow(this)">Siguiendo</button>
+      </div>
+      <div class="sugg-row">
+        <div class="sugg-av" style="background:linear-gradient(135deg,#0a2e1a,#2e0a2e)">LR</div>
+        <div class="sugg-info"><div class="sugg-name">Luna Roja</div><div class="sugg-genre">R&B · Sevilla</div></div>
+        <button class="follow-btn" onclick="toggleFollow(this)">Seguir</button>
+      </div>
+    </div>
+
+    <!-- Trending -->
+    <div class="widget">
+      <div class="widget-title">Tendencias</div>
+      <div class="trend-item"><div class="trend-num">01</div><div class="trend-tag">#NuevaMusica</div><div class="trend-count">4.2K posts</div></div>
+      <div class="trend-item"><div class="trend-num">02</div><div class="trend-tag">#TrapEspañol</div><div class="trend-count">2.8K posts</div></div>
+      <div class="trend-item"><div class="trend-num">03</div><div class="trend-tag">#Colabora</div><div class="trend-count">1.9K posts</div></div>
+      <div class="trend-item"><div class="trend-num">04</div><div class="trend-tag">#Emergente2025</div><div class="trend-count">1.6K posts</div></div>
+      <div class="trend-item"><div class="trend-num">05</div><div class="trend-tag">#BuscaProductor</div><div class="trend-count">980 posts</div></div>
+    </div>
+
+  </aside>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toastEl"></div>
 
 <script>
 const { createClient } = supabase;
-const sb = createClient(
-  'https://hwgwacbmxipzldxusqpb.supabase.co',
-  'sb_publishable_YqjmVj7azpmy7JLPABe3FQ_Eb7HUNkS'
-);
+const sb = createClient('https://hwgwacbmxipzldxusqpb.supabase.co','sb_publishable_YqjmVj7azpmy7JLPABe3FQ_Eb7HUNkS');
 
-let userData = null;
+let ME = null; // datos del usuario actual
+let postsData = []; // posts cargados
+let currentTab = 'muro';
 
-// ── INIT ──
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
 async function init() {
   const { data:{ session } } = await sb.auth.getSession();
   if (!session) { window.location.href = 'register.html'; return; }
 
-  // Cargar datos del usuario
   try {
-    const { data } = await sb.from('tu_usuarios')
-      .select('*').eq('id', session.user.id).single();
-    userData = data || { nombre: session.user.email.split('@')[0], email: session.user.email, plan:'gratuito', genero_musical:'', ciudad:'' };
+    const { data } = await sb.from('tu_usuarios').select('*').eq('id', session.user.id).single();
+    ME = data || {
+      id: session.user.id,
+      nombre: session.user.email.split('@')[0],
+      email: session.user.email,
+      plan: 'gratuito',
+      tipo_cuenta: 'artista',
+      genero_musical: '',
+      ciudad: ''
+    };
   } catch(e) {
-    userData = { nombre: session.user.email.split('@')[0], email: session.user.email, plan:'gratuito', genero_musical:'', ciudad:'' };
+    ME = {
+      id: session.user.id,
+      nombre: session.user.email.split('@')[0],
+      email: session.user.email,
+      plan: 'gratuito',
+      tipo_cuenta: 'artista',
+      genero_musical: '',
+      ciudad: ''
+    };
   }
 
   renderProfile();
-  buildWaveform('wf1');
-  document.getElementById('loading').style.display = 'none';
+  await loadPosts();
+  document.getElementById('loader').style.display = 'none';
 }
 
+// ══════════════════════════════════════
+// RENDER PERFIL
+// ══════════════════════════════════════
 function renderProfile() {
-  const ini = (userData.nombre||'?').charAt(0).toUpperCase();
-  document.getElementById('navAvatar').textContent = ini;
-  document.getElementById('navName').textContent = userData.nombre || 'Artista';
-  document.getElementById('profAvatar').textContent = ini;
-  document.getElementById('postAvatar').textContent = ini;
-  document.getElementById('profName').textContent = userData.nombre || '—';
-  document.getElementById('profGenre').textContent = userData.genero_musical || 'Sin género';
-  document.getElementById('profCity').textContent = userData.ciudad ? '📍 ' + userData.ciudad : '📍 Sin ciudad';
-  document.getElementById('wbName').textContent = (userData.nombre||'ARTISTA').toUpperCase();
-  const planEl = document.getElementById('profPlan');
-  if (userData.plan === 'premium') {
-    planEl.textContent = '★ PLAN PREMIUM';
-    planEl.className = 'profile-plan plan-premium';
+  const ini = (ME.nombre||'?').charAt(0).toUpperCase();
+  const esFan = ME.tipo_cuenta === 'fan';
+
+  // Nav
+  document.getElementById('navAv').textContent = ini;
+  document.getElementById('navNm').textContent = ME.nombre||'Artista';
+
+  // Sidebar
+  document.getElementById('profAvTxt').textContent = ini;
+  document.getElementById('profName').textContent = ME.nombre||'—';
+  document.getElementById('profGenre').textContent = ME.genero_musical || '';
+  document.getElementById('profCity').textContent = ME.ciudad ? '📍 '+ME.ciudad : '';
+
+  const tipoBadge = document.getElementById('profTipo');
+  const avEl = document.getElementById('profAv');
+  const badge = document.getElementById('profBadge');
+  const createAvEl = document.getElementById('createAv');
+
+  if (esFan) {
+    tipoBadge.textContent = 'FAN';
+    tipoBadge.className = 'p-tipo fan';
+    avEl.classList.add('pav-fan');
+    badge.textContent = '👥';
+    badge.className = 'pav-badge fan-badge';
+    createAvEl.className = 'create-av fan-av';
+    // Fan no puede subir música ni pedir colabo
+    document.getElementById('toolMusica').className = 'ctool disabled-tool';
+    document.getElementById('toolColabo').className = 'ctool disabled-tool';
+    document.getElementById('toolEvento').className = 'ctool disabled-tool';
+    document.getElementById('snMusica').style.display = 'none';
+    document.getElementById('snColabo').style.display = 'none';
+    // Añadir aviso fan
+    const notice = document.createElement('div');
+    notice.className = 'fan-notice';
+    notice.innerHTML = '👥 Como fan puedes comentar y dar like. Para subir música, crea una <a href="register.html" style="color:var(--purple);font-weight:700">cuenta de artista</a>.';
+    document.getElementById('createBox').insertBefore(notice, document.getElementById('createBar'));
+    document.getElementById('postTxt').placeholder = 'Comenta, reacciona o comparte algo con la comunidad...';
   }
+
+  createAvEl.textContent = ini;
 }
 
-// ── WAVEFORM ──
-function buildWaveform(id) {
-  const wf = document.getElementById(id);
-  if (!wf) return;
-  const n = 38, played = 0.35;
-  for (let i=0;i<n;i++) {
-    const b = document.createElement('div');
-    b.className = 'wb' + (i < n*played ? ' p':'');
-    b.style.height = (4+Math.random()*18)+'px';
-    wf.appendChild(b);
+// ══════════════════════════════════════
+// CARGAR POSTS desde Supabase
+// ══════════════════════════════════════
+async function loadPosts() {
+  try {
+    const { data, error } = await sb
+      .from('tu_posts')
+      .select(`*, tu_usuarios(nombre, genero_musical, ciudad, tipo_cuenta)`)
+      .order('creado_en', { ascending: false })
+      .limit(20);
+
+    if (error) throw error;
+    postsData = data || [];
+  } catch(e) {
+    postsData = [];
   }
+  renderPosts(postsData);
 }
 
-// ── PLAY ──
+// ══════════════════════════════════════
+// RENDERIZAR POSTS
+// ══════════════════════════════════════
+function renderPosts(posts) {
+  const container = document.getElementById('postsContainer');
+  if (posts.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="es-icon">🎵</div>
+        <div class="es-title">El muro está vacío</div>
+        <div class="es-sub">Sé el primero en publicar algo. Comparte tu música, busca colaboración o saluda a la comunidad.</div>
+      </div>
+      ${getSamplePosts()}`;
+    buildWaveforms();
+    return;
+  }
+
+  let html = '';
+  posts.forEach((p, i) => {
+    const u = p.tu_usuarios;
+    const nombre = u?.nombre || 'Artista';
+    const ini = nombre.charAt(0).toUpperCase();
+    const genero = u?.genero_musical || '';
+    const ciudad = u?.ciudad || '';
+    const isMine = p.usuario_id === ME?.id;
+    const hace = timeAgo(p.creado_en);
+    const colors = ['linear-gradient(135deg,#1a0a2e,#2e0a1a)','linear-gradient(135deg,#0a1a2e,#1a2e0a)','linear-gradient(135deg,#2e1a0a,#0a0a2e)','linear-gradient(135deg,#0a2e1a,#2e0a2e)'];
+    const color = colors[i % colors.length];
+
+    html += `
+    <div class="post" style="animation-delay:${i*0.05}s">
+      <div class="post-hdr">
+        <div class="post-av" style="background:${color}">${ini}</div>
+        <div class="post-meta">
+          <div class="post-author">${nombre}</div>
+          <div class="post-info">${genero ? genero+' · ':''} ${ciudad ? '📍'+ciudad+' · ':''} ${hace}</div>
+        </div>
+        ${isMine ? '<span class="my-post-tag">Tu post</span>' : ''}
+      </div>
+      <div class="post-body">${formatText(p.contenido||'')}</div>
+      <div class="post-acts">
+        <button class="pact" onclick="toggleLike(this)">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          ${p.likes_count||0}
+        </button>
+        <button class="pact" onclick="toast('Comentarios próximamente 💬','tok')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          ${p.comentarios_count||0}
+        </button>
+        <button class="pact" onclick="toast('¡Compartido! ↗️','tok')">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+          Compartir
+        </button>
+        ${isMine ? `<button class="pact" style="margin-left:auto;color:var(--accent2)" onclick="borrarPost('${p.id}', this)">🗑 Borrar</button>` : ''}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html + getSamplePosts();
+  buildWaveforms();
+  document.getElementById('psPostCount').textContent = posts.filter(p=>p.usuario_id===ME?.id).length;
+}
+
+function getSamplePosts() {
+  return `
+  <div class="post" style="animation-delay:.15s">
+    <div class="post-hdr">
+      <div class="post-av" style="background:linear-gradient(135deg,#1a0a2e,#2e0a1a)">MK</div>
+      <div class="post-meta">
+        <div class="post-author">Mikael Keys</div>
+        <div class="post-info">Trap · 📍 Madrid · hace 20 min</div>
+      </div>
+    </div>
+    <div class="track-embed">
+      <div class="te-cover" style="background:linear-gradient(135deg,#1a0a2e,#2e0a2e)">🎵</div>
+      <div class="te-info">
+        <div class="te-title">Noche Sin Fin</div>
+        <div class="te-artist">Mikael Keys · 3:42</div>
+        <div class="wf" id="wf1"></div>
+      </div>
+      <button class="play-circle" onclick="togglePlay(this)">
+        <svg width="11" height="11" fill="#000" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="post-body">Nuevo single después de 3 meses en el estudio 🔥 <span class="post-tag">#trap</span> <span class="post-tag">#nuevamusica</span></div>
+    <div class="post-acts">
+      <button class="pact liked" onclick="toggleLike(this)">❤️ 2.1K</button>
+      <button class="pact" onclick="toast('Comentarios próximamente','tok')">💬 87</button>
+      <button class="pact" onclick="toast('Compartido ↗️','tok')">↗️ Compartir</button>
+    </div>
+  </div>
+  <div class="post" style="animation-delay:.2s">
+    <div class="post-hdr">
+      <div class="post-av" style="background:linear-gradient(135deg,#0a1a2e,#1a2e0a)">AV</div>
+      <div class="post-meta">
+        <div class="post-author">Ana Vidal</div>
+        <div class="post-info">Dream Pop · 📍 Barcelona · hace 1h</div>
+      </div>
+    </div>
+    <div class="post-body">Buscando productor para mi EP 🎹 ¿Alguien trabaja Dream Pop con toques electrónicos? DM abierto. <span class="post-tag">#colaboracion</span></div>
+    <div class="collab-tag">
+      <span style="font-size:1rem">🤝</span>
+      <div><div style="font-size:.78rem;font-weight:700;color:var(--accent)">Busca colaboración</div><div style="font-size:.68rem;color:var(--muted)">Productor · Dream Pop · Bcn o remoto</div></div>
+      <button class="collab-tag-btn" onclick="toast('Contacto próximamente 💬','tok')">Contactar</button>
+    </div>
+    <div class="post-acts">
+      <button class="pact" onclick="toggleLike(this)">❤️ 342</button>
+      <button class="pact" onclick="toast('Comentarios próximamente','tok')">💬 54</button>
+      <button class="pact" onclick="toast('Compartido','tok')">↗️ Compartir</button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════
+// PUBLICAR POST
+// ══════════════════════════════════════
+async function publicarPost() {
+  const txt = document.getElementById('postTxt').value.trim();
+  if (!txt) { toast('⚠️ Escribe algo primero','terr'); return; }
+  if (!ME) { toast('⚠️ Sesión no encontrada','terr'); return; }
+
+  const btn = document.getElementById('btnPub');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    const { error } = await sb.from('tu_posts').insert({
+      usuario_id: ME.id,
+      tipo: 'texto',
+      contenido: txt
+    });
+    if (error) throw error;
+    document.getElementById('postTxt').value = '';
+    toast('✅ ¡Post publicado!','tok');
+    await loadPosts();
+  } catch(e) {
+    toast('⚠️ Error al publicar. Inténtalo de nuevo.','terr');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Publicar';
+}
+
+// ══════════════════════════════════════
+// BORRAR POST
+// ══════════════════════════════════════
+async function borrarPost(id, btn) {
+  if (!confirm('¿Borrar este post?')) return;
+  try {
+    await sb.from('tu_posts').delete().eq('id', id).eq('usuario_id', ME.id);
+    btn.closest('.post').remove();
+    toast('🗑 Post eliminado','tok');
+  } catch(e) { toast('Error al borrar','terr'); }
+}
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function timeAgo(date) {
+  if (!date) return '';
+  const diff = (Date.now() - new Date(date)) / 1000;
+  if (diff < 60) return 'ahora mismo';
+  if (diff < 3600) return 'hace '+Math.floor(diff/60)+' min';
+  if (diff < 86400) return 'hace '+Math.floor(diff/3600)+'h';
+  return 'hace '+Math.floor(diff/86400)+'d';
+}
+
+function formatText(txt) {
+  return txt
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/#(\w+)/g,'<span class="post-tag">#$1</span>')
+    .replace(/\n/g,'<br>');
+}
+
+function buildWaveforms() {
+  document.querySelectorAll('.wf').forEach(wf => {
+    if (wf.children.length) return;
+    const n=36, p=0.35;
+    for (let i=0;i<n;i++) {
+      const b=document.createElement('div');
+      b.className='wfb'+(i<n*p?' wp':'');
+      b.style.height=(4+Math.random()*16)+'px';
+      wf.appendChild(b);
+    }
+  });
+}
+
 function togglePlay(btn) {
-  const playing = btn.dataset.p === '1';
-  btn.dataset.p = playing ? '0':'1';
-  btn.innerHTML = playing
-    ? '<svg width="12" height="12" fill="#000" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
-    : '<svg width="12" height="12" fill="#000" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+  const on = btn.dataset.p==='1';
+  btn.dataset.p = on?'0':'1';
+  btn.innerHTML = on
+    ? '<svg width="11" height="11" fill="#000" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'
+    : '<svg width="11" height="11" fill="#000" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
 }
 
-// ── POST ──
-function sendPost() {
-  const txt = document.getElementById('postText').value.trim();
-  if (!txt) { showToast('⚠️ Escribe algo primero'); return; }
-  document.getElementById('postText').value = '';
-  showToast('✅ ¡Post publicado!');
+function toggleLike(btn) { btn.classList.toggle('liked'); }
+
+function toggleFollow(btn) {
+  btn.classList.toggle('following');
+  btn.textContent = btn.classList.contains('following') ? 'Siguiendo' : 'Seguir';
 }
 
-// ── LOGOUT ──
-async function logout() {
+function setTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.sn-item').forEach(x=>x.classList.remove('active'));
+  if (t==='muro') {
+    document.querySelectorAll('.nav-tab')[0].classList.add('active');
+    document.querySelectorAll('.sn-item')[0].classList.add('active');
+  }
+  if (t==='perfil') { toast('Perfil completo próximamente 👤','tok'); return; }
+  if (t==='explorar') { toast('Explorar próximamente 🔍','tok'); return; }
+}
+
+function ftab(el, tipo) {
+  document.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  if (tipo==='todos') renderPosts(postsData);
+  else if (tipo==='artistas') renderPosts(postsData.filter(p=>p.tu_usuarios?.tipo_cuenta==='artista'));
+  else renderPosts(postsData.filter(p=>p.contenido?.toLowerCase().includes('colabo')||p.tipo==='colaboracion'));
+}
+
+let toastTimer;
+function toast(msg, tipo='tok') {
+  const el = document.getElementById('toastEl');
+  el.textContent = msg;
+  el.className = 'toast show '+tipo;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+async function doLogout() {
   await sb.auth.signOut();
   window.location.href = 'register.html';
-}
-
-// ── TOAST ──
-let toastTimer;
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show','success');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show','success'), 2800);
 }
 
 init();
