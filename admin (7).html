@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TALENTOURBANO — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{
+  --bg:#080b10;--surface:#0f1318;--card:#151a21;--card2:#1a2028;
+  --border:#1e2530;--accent:#00e5ff;--accent2:#ff3366;--purple:#a060ff;--green:#00d084;
+  --text:#e8edf5;--muted:#5a6a7a;--muted2:#8090a0;
+  --danger:#ff4444;--warn:#ffaa00;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex}
+
+/* ── SIDEBAR ── */
+.sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:10}
+.sb-logo{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
+.sb-logo-txt{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:3px;color:var(--accent)}
+.sb-logo-sub{font-size:.62rem;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-top:2px;font-family:'DM Mono',monospace}
+.sb-nav{padding:.75rem .65rem;flex:1;overflow-y:auto}
+.sb-section{font-size:.6rem;font-weight:600;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;padding:.5rem .6rem .3rem;font-family:'DM Mono',monospace}
+.sb-item{display:flex;align-items:center;gap:.6rem;padding:.6rem .7rem;border-radius:8px;font-size:.83rem;cursor:pointer;transition:all .15s;color:var(--muted2);border:none;background:transparent;width:100%;text-align:left;margin-bottom:1px}
+.sb-item:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.sb-item.active{color:var(--accent);background:rgba(0,229,255,.09);font-weight:600}
+.sb-item .ico{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--accent2);color:#fff;font-size:.58rem;font-weight:700;padding:1px 6px;border-radius:8px}
+.sb-footer{padding:1rem 1.25rem;border-top:1px solid var(--border)}
+.sb-user{display:flex;align-items:center;gap:.6rem}
+.sb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#007a99);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.85rem;color:#000;flex-shrink:0}
+.sb-uname{font-size:.75rem;font-weight:600;color:var(--text)}
+.sb-urole{font-size:.62rem;color:var(--accent);font-family:'DM Mono',monospace}
+.btn-logout{display:block;width:100%;margin-top:.65rem;padding:.38rem;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.72rem;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.btn-logout:hover{color:var(--accent2);border-color:var(--accent2)}
+
+/* ── MAIN ── */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:56px;background:rgba(8,11,16,.95);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.75rem;gap:1rem;position:sticky;top:0;z-index:5;backdrop-filter:blur(16px)}
+.topbar-title{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:1px;flex:1}
+.topbar-tag{font-size:.62rem;font-family:'DM Mono',monospace;color:var(--accent);background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.2);border-radius:5px;padding:.2rem .55rem}
+.content{padding:1.5rem 1.75rem;flex:1}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.15rem 1.25rem;position:relative;overflow:hidden;transition:border-color .2s}
+.stat-card:hover{border-color:rgba(255,255,255,.12)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.cyan::before{background:linear-gradient(90deg,var(--accent),transparent)}
+.stat-card.pink::before{background:linear-gradient(90deg,var(--accent2),transparent)}
+.stat-card.purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.stat-card.green::before{background:linear-gradient(90deg,var(--green),transparent)}
+.stat-card.warn::before{background:linear-gradient(90deg,var(--warn),transparent)}
+.stat-ico{font-size:1.3rem;margin-bottom:.5rem}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;letter-spacing:1px}
+.stat-card.cyan .stat-n{color:var(--accent)}
+.stat-card.pink .stat-n{color:var(--accent2)}
+.stat-card.purple .stat-n{color:var(--purple)}
+.stat-card.green .stat-n{color:var(--green)}
+.stat-card.warn .stat-n{color:var(--warn)}
+.stat-lbl{font-size:.7rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em;margin-top:.2rem;font-family:'DM Mono',monospace}
+.stat-sub{font-size:.68rem;color:var(--muted);margin-top:.4rem}
+
+/* ── SECTION ── */
+.section{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:1.25rem;overflow:hidden}
+.section-head{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.25rem;border-bottom:1px solid var(--border)}
+.section-title{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;display:flex;align-items:center;gap:.5rem}
+.section-body{padding:0}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:.7rem 1.25rem;text-align:left;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace;white-space:nowrap}
+.tbl td{padding:.75rem 1.25rem;font-size:.82rem;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.tbl-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#007a99);display:inline-flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:.8rem;color:#000;vertical-align:middle;overflow:hidden;flex-shrink:0}
+.tbl-av img{width:100%;height:100%;object-fit:cover}
+.tbl-name{font-weight:600;color:var(--text)}
+.tbl-sub{font-size:.7rem;color:var(--muted2)}
+.pill{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .6rem;border-radius:20px}
+.pill-art{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid rgba(0,229,255,.2)}
+.pill-fan{background:rgba(160,96,255,.1);color:var(--purple);border:1px solid rgba(160,96,255,.2)}
+.pill-free{background:rgba(255,255,255,.06);color:var(--muted2);border:1px solid var(--border)}
+.pill-pro{background:rgba(0,208,132,.1);color:var(--green);border:1px solid rgba(0,208,132,.2)}
+.pill-admin{background:rgba(255,170,0,.1);color:var(--warn);border:1px solid rgba(255,170,0,.2)}
+.pill-pend{background:rgba(255,170,0,.1);color:var(--warn)}
+.pill-ok{background:rgba(0,208,132,.1);color:var(--green)}
+.pill-ko{background:rgba(255,68,68,.1);color:var(--danger)}
+.btn-sm{padding:.3rem .7rem;border-radius:6px;font-size:.72rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif}
+.btn-danger{background:rgba(255,68,68,.12);color:var(--danger);border:1px solid rgba(255,68,68,.2)}
+.btn-danger:hover{background:rgba(255,68,68,.25)}
+.btn-warn{background:rgba(255,170,0,.1);color:var(--warn);border:1px solid rgba(255,170,0,.2)}
+.btn-warn:hover{background:rgba(255,170,0,.2)}
+.btn-ok{background:rgba(0,208,132,.1);color:var(--green);border:1px solid rgba(0,208,132,.2)}
+.btn-ok:hover{background:rgba(0,208,132,.2)}
+.btn-accent{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid rgba(0,229,255,.2)}
+.btn-accent:hover{background:rgba(0,229,255,.2)}
+
+/* ── SEARCH ── */
+.admin-search{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.42rem .85rem;color:var(--text);font-size:.8rem;outline:none;font-family:'DM Sans',sans-serif;width:220px;transition:border-color .2s}
+.admin-search:focus{border-color:rgba(0,229,255,.3)}
+
+/* ── TAB PANEL ── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── SPINNER ── */
+.spin{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:.7rem 1.1rem;font-size:.82rem;z-index:999;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+#toast.ok{border-color:rgba(0,208,132,.3);color:var(--green)}
+#toast.err{border-color:rgba(255,68,68,.3);color:var(--danger)}
+
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:2.5rem;color:var(--muted);font-size:.84rem}
+
+/* ── LOADER ── */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem}
+.loader-logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:5px;color:var(--accent)}
+.loader-sub{font-size:.7rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.15em}
+
+/* ── CHART ── */
+.mini-chart{display:flex;align-items:flex-end;gap:3px;height:40px}
+.mini-bar{flex:1;background:rgba(0,229,255,.25);border-radius:3px 3px 0 0;transition:height .4s;min-height:2px;cursor:default}
+.mini-bar:hover{background:rgba(0,229,255,.55)}
+
+/* ── MODAL CONFIRM ── */
+#confirmModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#confirmModal.show{display:flex}
+.confirm-box{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:340px;text-align:center}
+.confirm-title{font-weight:700;font-size:.95rem;margin-bottom:.5rem;color:var(--text)}
+.confirm-msg{font-size:.82rem;color:var(--muted2);line-height:1.5;margin-bottom:1.25rem}
+.confirm-btns{display:flex;gap:.65rem;justify-content:center}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">⬡ TALENTOURBANO</div>
+  <div class="loader-sub">Admin Panel · Cargando...</div>
+  <div class="spin" style="margin-top:.5rem"></div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-txt">⬡ TALENTOURBANO</div>
+    <div class="sb-logo-sub">Admin Panel</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">General</div>
+    <button class="sb-item active" onclick="showPanel('dashboard')"><span class="ico">📊</span>Dashboard</button>
+    <button class="sb-item" onclick="showPanel('usuarios')"><span class="ico">👥</span>Usuarios <span class="sb-badge" id="sbBadgeUsers">0</span></button>
+    <button class="sb-item" onclick="showPanel('posts')"><span class="ico">📝</span>Publicaciones</button>
+    <button class="sb-item" onclick="showPanel('mensajes')"><span class="ico">💬</span>Mensajes</button>
+    <div class="sb-section" style="margin-top:.5rem">Contenido</div>
+    <button class="sb-item" onclick="showPanel('colaborar')"><span class="ico">🤝</span>Colaboraciones</button>
+    <button class="sb-item" onclick="showPanel('eventos')"><span class="ico">📅</span>Eventos</button>
+    <div class="sb-section" style="margin-top:.5rem">Sistema</div>
+    <button class="sb-item" onclick="window.open('dashboard.html','_blank')"><span class="ico">🌐</span>Ver sitio</button>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-av" id="sbAv">A</div>
+      <div>
+        <div class="sb-uname" id="sbName">—</div>
+        <div class="sb-urole">ADMIN</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Cerrar sesión</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topTitle">Dashboard</div>
+    <div class="topbar-tag" id="topDate"></div>
+    <div style="font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace" id="topTime"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── DASHBOARD PANEL ── -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card cyan"><div class="spin"></div></div>
+      </div>
+
+      <!-- Actividad reciente -->
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">⚡ Actividad reciente</div>
+          <button class="btn-sm btn-accent" onclick="loadDashboard()">↻ Actualizar</button>
+        </div>
+        <table class="tbl" id="actividadTbl">
+          <thead><tr><th>Usuario</th><th>Acción</th><th>Hace</th></tr></thead>
+          <tbody id="actividadBody"><tr><td colspan="3" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+      </div>
+
+      <!-- Registros últimos 7 días -->
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">📈 Registros últimos 7 días</div>
+        </div>
+        <div style="padding:1.25rem">
+          <div class="mini-chart" id="regChart" style="height:60px"></div>
+          <div id="regLabels" style="display:flex;gap:3px;margin-top:4px;font-size:.6rem;color:var(--muted);font-family:'DM Mono',monospace"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USUARIOS PANEL ── -->
+    <div class="panel" id="panel-usuarios">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">👥 Usuarios</div>
+          <div style="display:flex;gap:.65rem;align-items:center">
+            <input class="admin-search" id="userSearch" placeholder="Buscar..." oninput="filtrarUsuarios(this.value)"/>
+            <select id="userFilter" onchange="filtrarUsuarios(document.getElementById('userSearch').value)" style="background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:.4rem .65rem;color:var(--text);font-size:.75rem;outline:none;cursor:pointer">
+              <option value="">Todos</option>
+              <option value="artista">Artistas</option>
+              <option value="fan">Fans</option>
+              <option value="admin">Admins</option>
+            </select>
+          </div>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Usuario</th><th>Tipo</th><th>Plan</th><th>Registrado</th><th>Acciones</th></tr></thead>
+          <tbody id="usersTbody"><tr><td colspan="5" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── POSTS PANEL ── -->
+    <div class="panel" id="panel-posts">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">📝 Publicaciones</div>
+          <input class="admin-search" id="postSearch" placeholder="Buscar contenido..." oninput="filtrarPosts(this.value)"/>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Autor</th><th>Contenido</th><th>Likes</th><th>Comentarios</th><th>Publicado</th><th>Acción</th></tr></thead>
+          <tbody id="postsTbody"><tr><td colspan="6" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── MENSAJES PANEL ── -->
+    <div class="panel" id="panel-mensajes">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">💬 Mensajes directos</div>
+          <span style="font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace">Solo lectura</span>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>De</th><th>Para</th><th>Mensaje</th><th>Enviado</th><th>Leído</th></tr></thead>
+          <tbody id="msgsTbody"><tr><td colspan="5" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── COLABORAR PANEL ── -->
+    <div class="panel" id="panel-colaborar">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">🤝 Posts de colaboración</div>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Artista</th><th>Contenido</th><th>Publicado</th><th>Acción</th></tr></thead>
+          <tbody id="colaborarTbody"><tr><td colspan="4" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── EVENTOS PANEL ── -->
+    <div class="panel" id="panel-eventos">
+      <div class="section">
+        <div class="section-head">
+          <div class="section-title">📅 Eventos</div>
+        </div>
+        <table class="tbl">
+          <thead><tr><th>Creador</th><th>Título</th><th>Lugar</th><th>Fecha</th><th>Acción</th></tr></thead>
+          <tbody id="eventosTbody"><tr><td colspan="5" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<div id="toast"></div>
+
+<!-- Confirm modal -->
+<div id="confirmModal">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirmTitle">¿Confirmar acción?</div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-btns">
+      <button class="btn-sm" onclick="closeConfirm()" style="border:1px solid var(--border);background:transparent;color:var(--muted2)">Cancelar</button>
+      <button class="btn-sm btn-danger" id="confirmOkBtn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const { createClient } = supabase;
+const sb = createClient('https://hwgwacbmxipzldxusqpb.supabase.co','sb_publishable_YqjmVj7azpmy7JLPABe3FQ_Eb7HUNkS');
+
+let ME = null;
+let allUsers = [], allPosts = [], allMsgs = [], allColabPosts = [], allEventos = [];
+let confirmCallback = null;
+let tt = null;
+
+// ── INIT ──
+const loaderTimeout = setTimeout(() => hideLoader(), 8000);
+async function init() {
+  try {
+    const { data:{ session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = 'register.html'; return; }
+
+    const { data: u } = await sb.from('tu_usuarios').select('*').eq('id', session.user.id).single();
+    if (!u || !u.es_admin) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:1rem"><div style="font-size:2rem">🚫</div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.5rem;letter-spacing:2px;color:#ff4444">Acceso denegado</div><div style="font-size:.85rem;color:#5a6a7a">Solo administradores pueden acceder</div><a href="dashboard.html" style="margin-top:1rem;color:#00e5ff;font-size:.82rem">← Volver al dashboard</a></div>';
+      return;
+    }
+    ME = u;
+    document.getElementById('sbAv').textContent = (u.nombre||'A').charAt(0).toUpperCase();
+    document.getElementById('sbName').textContent = u.nombre || u.email;
+    setTime();
+    setInterval(setTime, 1000);
+    await loadDashboard();
+  } catch(e) {
+    console.error(e);
+  } finally {
+    clearTimeout(loaderTimeout);
+    hideLoader();
+  }
+}
+
+function hideLoader() { document.getElementById('loader').style.display = 'none'; }
+
+function setTime() {
+  const now = new Date();
+  document.getElementById('topDate').textContent = now.toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('topTime').textContent = now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ── PANEL SWITCH ──
+const panelTitles = { dashboard:'Dashboard', usuarios:'Usuarios', posts:'Publicaciones', mensajes:'Mensajes directos', colaborar:'Colaboraciones', eventos:'Eventos' };
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id)?.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(b=>{ if(b.textContent.trim().toLowerCase().startsWith(panelTitles[id]?.substring(0,4).toLowerCase()||id)) b.classList.add('active'); });
+  document.getElementById('topTitle').textContent = panelTitles[id]||id;
+  const loaders = { usuarios: loadUsuarios, posts: loadPosts, mensajes: loadMensajes, colaborar: loadColaborar, eventos: loadEventos };
+  if (loaders[id]) loaders[id]();
+}
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  try {
+    const [usersR, postsR, msgsR, notifR, eventosR] = await Promise.all([
+      sb.from('tu_usuarios').select('*', {count:'exact', head:false}),
+      sb.from('tu_posts').select('*', {count:'exact', head:false}),
+      sb.from('tu_mensajes').select('*', {count:'exact', head:true}),
+      sb.from('tu_notificaciones').select('*', {count:'exact', head:true}),
+      sb.from('tu_eventos').select('*', {count:'exact', head:true}),
+    ]);
+
+    const users = usersR.data || [];
+    const posts = postsR.data || [];
+    const artistas = users.filter(u=>u.tipo_cuenta==='artista').length;
+    const fans = users.filter(u=>u.tipo_cuenta==='fan').length;
+    const totalLikes = posts.reduce((a,p)=>a+(p.likes_count||0),0);
+
+    document.getElementById('sbBadgeUsers').textContent = users.length;
+
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card cyan">
+        <div class="stat-ico">👥</div>
+        <div class="stat-n">${users.length}</div>
+        <div class="stat-lbl">Usuarios totales</div>
+        <div class="stat-sub">${artistas} artistas · ${fans} fans</div>
+      </div>
+      <div class="stat-card pink">
+        <div class="stat-ico">📝</div>
+        <div class="stat-n">${posts.length}</div>
+        <div class="stat-lbl">Publicaciones</div>
+        <div class="stat-sub">${totalLikes} likes totales</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-ico">💬</div>
+        <div class="stat-n">${msgsR.count||0}</div>
+        <div class="stat-lbl">Mensajes enviados</div>
+        <div class="stat-sub">${notifR.count||0} notificaciones</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-ico">📅</div>
+        <div class="stat-n">${eventosR.count||0}</div>
+        <div class="stat-lbl">Eventos creados</div>
+      </div>
+      <div class="stat-card warn">
+        <div class="stat-ico">🤝</div>
+        <div class="stat-n">${posts.filter(p=>p.es_colaboracion).length}</div>
+        <div class="stat-lbl">Búsquedas colabo</div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-ico">🎵</div>
+        <div class="stat-n">${posts.filter(p=>p.spotify_embed_id).length}</div>
+        <div class="stat-lbl">Tracks subidos</div>
+      </div>`;
+
+    // Actividad reciente — últimos 10 posts
+    const recent = [...posts].sort((a,b)=>new Date(b.creado_en)-new Date(a.creado_en)).slice(0,10);
+    const userMap = {};
+    users.forEach(u=>userMap[u.id]=u);
+    document.getElementById('actividadBody').innerHTML = recent.length ? recent.map(p=>{
+      const u = userMap[p.usuario_id]||{};
+      const ini = (u.nombre||'?').charAt(0).toUpperCase();
+      const avHtml = u.avatar_url
+        ? `<div class="tbl-av"><img src="${u.avatar_url}" onerror="this.parentElement.textContent='${ini}'"/></div>`
+        : `<div class="tbl-av">${ini}</div>`;
+      const tipo = p.es_colaboracion ? '🤝 Busca colaboración' : p.spotify_embed_id ? '🎵 Subió track' : '📝 Publicó post';
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:.6rem">${avHtml}<div><div class="tbl-name">${u.nombre||'—'}</div><div class="tbl-sub">${u.email||''}</div></div></div></td>
+        <td style="color:var(--muted2)">${tipo} ${p.contenido ? '· "'+p.contenido.substring(0,40)+(p.contenido.length>40?'…':'')+'"' : ''}</td>
+        <td style="color:var(--muted);font-size:.75rem;font-family:'DM Mono',monospace">${timeAgo(p.creado_en)}</td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="3" class="empty-state">Sin actividad reciente</td></tr>';
+
+    // Mini chart registros últimos 7 días
+    const days = [];
+    for (let i=6;i>=0;i--) {
+      const d = new Date(); d.setDate(d.getDate()-i); d.setHours(0,0,0,0);
+      days.push(d);
+    }
+    const counts = days.map(d => {
+      const next = new Date(d); next.setDate(next.getDate()+1);
+      return users.filter(u=>{ const t=new Date(u.creado_en); return t>=d&&t<next; }).length;
+    });
+    const maxC = Math.max(...counts,1);
+    document.getElementById('regChart').innerHTML = counts.map((c,i)=>`<div class="mini-bar" style="height:${Math.round(c/maxC*100)}%;background:${c>0?'rgba(0,229,255,.4)':'rgba(255,255,255,.06)'}" title="${days[i].toLocaleDateString('es-ES',{weekday:'short',day:'numeric'})}: ${c} reg"></div>`).join('');
+    document.getElementById('regLabels').innerHTML = days.map(d=>`<div style="flex:1;text-align:center">${d.toLocaleDateString('es-ES',{weekday:'short'}).charAt(0)}</div>`).join('');
+
+  } catch(e) { console.error(e); toast('Error al cargar dashboard', 'err'); }
+}
+
+// ── USUARIOS ──
+async function loadUsuarios() {
+  document.getElementById('usersTbody').innerHTML = '<tr><td colspan="5" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr>';
+  try {
+    const { data } = await sb.from('tu_usuarios').select('*').order('creado_en', {ascending:false});
+    allUsers = data || [];
+    renderUsuarios(allUsers);
+  } catch(e) { toast('Error al cargar usuarios','err'); }
+}
+
+function filtrarUsuarios(q) {
+  const filtro = document.getElementById('userFilter').value;
+  q = (q||'').toLowerCase();
+  const filtered = allUsers.filter(u=>{
+    const matchQ = !q || (u.nombre||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q);
+    const matchF = !filtro || u.tipo_cuenta===filtro || (filtro==='admin'&&u.es_admin);
+    return matchQ && matchF;
+  });
+  renderUsuarios(filtered);
+}
+
+function renderUsuarios(list) {
+  const tb = document.getElementById('usersTbody');
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="5" class="empty-state">No se encontraron usuarios</td></tr>'; return; }
+  tb.innerHTML = list.map(u=>{
+    const ini = (u.nombre||'?').charAt(0).toUpperCase();
+    const avHtml = u.avatar_url
+      ? `<div class="tbl-av"><img src="${u.avatar_url}" onerror="this.parentElement.textContent='${ini}'"/></div>`
+      : `<div class="tbl-av">${ini}</div>`;
+    const tipoPill = u.es_admin ? '<span class="pill pill-admin">ADMIN</span>' : u.tipo_cuenta==='fan' ? '<span class="pill pill-fan">Fan</span>' : '<span class="pill pill-art">Artista</span>';
+    const planPill = u.plan==='pro' ? '<span class="pill pill-pro">PRO</span>' : '<span class="pill pill-free">Free</span>';
+    const fecha = new Date(u.creado_en).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+    const adminBtn = u.es_admin
+      ? `<button class="btn-sm btn-warn" onclick="toggleAdmin('${u.id}',false,'${escH(u.nombre||u.email)}')">Quitar admin</button>`
+      : `<button class="btn-sm btn-ok" onclick="toggleAdmin('${u.id}',true,'${escH(u.nombre||u.email)}')">Hacer admin</button>`;
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:.6rem">${avHtml}<div><div class="tbl-name">${escH(u.nombre||'—')}</div><div class="tbl-sub">${escH(u.email||'')}</div>${u.bio?`<div class="tbl-sub" style="font-style:italic">${escH(u.bio.substring(0,40))}</div>`:''}</div></div></td>
+      <td>${tipoPill}</td>
+      <td>${planPill}</td>
+      <td style="font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace">${fecha}</td>
+      <td><div style="display:flex;gap:.4rem;flex-wrap:wrap">${adminBtn}<button class="btn-sm btn-danger" onclick="eliminarUsuario('${u.id}','${escH(u.nombre||u.email)}')">🗑 Eliminar</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function toggleAdmin(userId, setAdmin, nombre) {
+  confirm2(`${setAdmin?'Dar':'Quitar'} permisos de admin a ${nombre}`, async()=>{
+    try {
+      await sb.from('tu_usuarios').update({es_admin: setAdmin}).eq('id', userId);
+      toast(setAdmin ? `✅ ${nombre} ahora es admin` : `✅ Admin quitado a ${nombre}`, 'ok');
+      await loadUsuarios();
+    } catch(e) { toast('Error: '+e.message,'err'); }
+  });
+}
+
+async function eliminarUsuario(userId, nombre) {
+  confirm2(`¿Eliminar permanentemente a ${nombre}? Se borrarán todos sus posts, likes y datos.`, async()=>{
+    try {
+      await sb.from('tu_usuarios').delete().eq('id', userId);
+      toast(`🗑 Usuario ${nombre} eliminado`, 'ok');
+      await loadUsuarios();
+    } catch(e) { toast('Error: '+e.message,'err'); }
+  }, true);
+}
+
+// ── POSTS ──
+async function loadPosts() {
+  document.getElementById('postsTbody').innerHTML = '<tr><td colspan="6" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr>';
+  try {
+    const { data } = await sb.from('tu_posts').select('*, tu_usuarios(nombre,email,avatar_url)').order('creado_en',{ascending:false}).limit(100);
+    allPosts = data || [];
+    renderPosts(allPosts);
+  } catch(e) { toast('Error al cargar posts','err'); }
+}
+
+function filtrarPosts(q) {
+  q = (q||'').toLowerCase();
+  renderPosts(q ? allPosts.filter(p=>(p.contenido||'').toLowerCase().includes(q)||(p.tu_usuarios?.nombre||'').toLowerCase().includes(q)) : allPosts);
+}
+
+function renderPosts(list) {
+  const tb = document.getElementById('postsTbody');
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">Sin publicaciones</td></tr>'; return; }
+  tb.innerHTML = list.map(p=>{
+    const u = p.tu_usuarios||{};
+    const ini = (u.nombre||'?').charAt(0).toUpperCase();
+    const avHtml = u.avatar_url
+      ? `<div class="tbl-av"><img src="${u.avatar_url}" onerror="this.parentElement.textContent='${ini}'"/></div>`
+      : `<div class="tbl-av">${ini}</div>`;
+    const badges = [p.es_colaboracion?'🤝':'', p.spotify_embed_id?'🎵':''].filter(Boolean).join(' ');
+    const contenido = (p.contenido||'Sin texto').substring(0,60)+(p.contenido?.length>60?'…':'');
+    const fecha = new Date(p.creado_en).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+    return `<tr>
+      <td><div style="display:flex;align-items:center;gap:.6rem">${avHtml}<div class="tbl-name">${escH(u.nombre||'—')}</div></div></td>
+      <td style="max-width:240px"><span style="color:var(--muted2)">${badges}</span> ${escH(contenido)}</td>
+      <td style="text-align:center"><span style="color:var(--accent2)">❤️ ${p.likes_count||0}</span></td>
+      <td style="text-align:center"><span style="color:#6699ff">💬 ${p.comentarios_count||0}</span></td>
+      <td style="font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace">${fecha}</td>
+      <td><button class="btn-sm btn-danger" onclick="eliminarPost('${p.id}')">🗑 Borrar</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function eliminarPost(postId) {
+  confirm2('¿Borrar esta publicación definitivamente?', async()=>{
+    try {
+      await sb.from('tu_posts').delete().eq('id', postId);
+      toast('🗑 Post eliminado','ok');
+      await loadPosts();
+    } catch(e) { toast('Error: '+e.message,'err'); }
+  }, true);
+}
+
+// ── MENSAJES ──
+async function loadMensajes() {
+  document.getElementById('msgsTbody').innerHTML = '<tr><td colspan="5" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr>';
+  try {
+    const { data } = await sb.from('tu_mensajes').select('*, rem:tu_usuarios!tu_mensajes_remitente_id_fkey(nombre), dest:tu_usuarios!tu_mensajes_destinatario_id_fkey(nombre)').order('creado_en',{ascending:false}).limit(50);
+    // Fallback si fk names fail
+    let msgs = data;
+    if (!msgs || msgs.length===0 || !msgs[0]?.rem) {
+      const { data: d2 } = await sb.from('tu_mensajes').select('*').order('creado_en',{ascending:false}).limit(50);
+      msgs = d2||[];
+    }
+    allMsgs = msgs||[];
+    const tb = document.getElementById('msgsTbody');
+    if (!allMsgs.length) { tb.innerHTML='<tr><td colspan="5" class="empty-state">Sin mensajes</td></tr>'; return; }
+    tb.innerHTML = allMsgs.map(m=>{
+      const from = m.rem?.nombre || m.remitente_id?.substring(0,8)+'…' || '—';
+      const to = m.dest?.nombre || m.destinatario_id?.substring(0,8)+'…' || '—';
+      const fecha = new Date(m.creado_en).toLocaleDateString('es-ES',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      return `<tr>
+        <td class="tbl-name">${escH(from)}</td>
+        <td class="tbl-name">${escH(to)}</td>
+        <td style="color:var(--muted2);max-width:260px">${escH((m.contenido||'').substring(0,80))}</td>
+        <td style="font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace">${fecha}</td>
+        <td>${m.leido ? '<span class="pill pill-ok">✓ Leído</span>' : '<span class="pill pill-pend">Pendiente</span>'}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) { toast('Error al cargar mensajes','err'); }
+}
+
+// ── COLABORAR ──
+async function loadColaborar() {
+  document.getElementById('colaborarTbody').innerHTML = '<tr><td colspan="4" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr>';
+  try {
+    const { data } = await sb.from('tu_posts').select('*, tu_usuarios(nombre,email)').eq('es_colaboracion',true).order('creado_en',{ascending:false});
+    allColabPosts = data||[];
+    const tb = document.getElementById('colaborarTbody');
+    if (!allColabPosts.length) { tb.innerHTML='<tr><td colspan="4" class="empty-state">No hay posts de colaboración</td></tr>'; return; }
+    tb.innerHTML = allColabPosts.map(p=>{
+      const u = p.tu_usuarios||{};
+      const fecha = new Date(p.creado_en).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+      return `<tr>
+        <td><div class="tbl-name">${escH(u.nombre||'—')}</div><div class="tbl-sub">${escH(u.email||'')}</div></td>
+        <td style="color:var(--muted2);max-width:300px">${escH((p.contenido||'—').substring(0,100))}</td>
+        <td style="font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace">${fecha}</td>
+        <td><button class="btn-sm btn-danger" onclick="eliminarPost('${p.id}')">🗑 Borrar</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { toast('Error','err'); }
+}
+
+// ── EVENTOS ──
+async function loadEventos() {
+  document.getElementById('eventosTbody').innerHTML = '<tr><td colspan="5" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr>';
+  try {
+    const { data } = await sb.from('tu_eventos').select('*, tu_usuarios(nombre)').order('fecha',{ascending:false});
+    allEventos = data||[];
+    const tb = document.getElementById('eventosTbody');
+    if (!allEventos.length) { tb.innerHTML='<tr><td colspan="5" class="empty-state">Sin eventos</td></tr>'; return; }
+    tb.innerHTML = allEventos.map(ev=>{
+      const u = ev.tu_usuarios||{};
+      const fecha = new Date(ev.fecha).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      const pasado = new Date(ev.fecha) < new Date();
+      return `<tr>
+        <td class="tbl-name">${escH(u.nombre||'—')}</td>
+        <td class="tbl-name">${escH(ev.titulo||'—')}</td>
+        <td style="color:var(--muted2)">${escH(ev.lugar||'—')}</td>
+        <td style="font-size:.75rem;font-family:'DM Mono',monospace;color:${pasado?'var(--muted)':'var(--accent)'}">${fecha}${pasado?' (pasado)':''}</td>
+        <td><button class="btn-sm btn-danger" onclick="eliminarEvento('${ev.id}')">🗑 Borrar</button></td>
+      </tr>`;
+    }).join('');
+  } catch(e) { toast('Error','err'); }
+}
+
+async function eliminarEvento(id) {
+  confirm2('¿Borrar este evento?', async()=>{
+    await sb.from('tu_eventos').delete().eq('id',id);
+    toast('🗑 Evento eliminado','ok');
+    await loadEventos();
+  }, true);
+}
+
+// ── HELPERS ──
+function escH(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now()-new Date(ts))/1000);
+  if (s<60) return 'ahora';
+  if (s<3600) return Math.floor(s/60)+'m';
+  if (s<86400) return Math.floor(s/3600)+'h';
+  return Math.floor(s/86400)+'d';
+}
+
+function toast(msg, tipo='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'show '+tipo;
+  clearTimeout(tt); tt = setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+function confirm2(msg, cb, danger=false) {
+  document.getElementById('confirmMsg').textContent = msg;
+  const btn = document.getElementById('confirmOkBtn');
+  btn.className = 'btn-sm '+(danger?'btn-danger':'btn-ok');
+  confirmCallback = cb;
+  document.getElementById('confirmModal').classList.add('show');
+}
+document.getElementById('confirmOkBtn').onclick = ()=>{ closeConfirm(); if(confirmCallback) confirmCallback(); };
+function closeConfirm() { document.getElementById('confirmModal').classList.remove('show'); confirmCallback=null; }
+
+async function doLogout() { await sb.auth.signOut(); window.location.href='register.html'; }
+
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeConfirm(); });
+
+init();
+</script>
+</body>
+</html>
