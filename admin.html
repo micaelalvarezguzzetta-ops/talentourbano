@@ -457,10 +457,23 @@ async function loadDashboard() {
 async function loadUsuarios() {
   document.getElementById('usersTbody').innerHTML = '<tr><td colspan="5" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr>';
   try {
-    const { data } = await sb.from('tu_usuarios').select('*').order('creado_en', {ascending:false});
-    allUsers = data || [];
+    // Sin order para evitar fallo si columna no existe
+    const { data, error } = await sb.from('tu_usuarios').select('*');
+    if (error) throw error;
+    // Ordenar en JS
+    allUsers = (data || []).sort((a,b) => new Date(b.creado_en||0) - new Date(a.creado_en||0));
+    // Actualizar badge sidebar
+    const badge = document.getElementById('sbBadgeUsers');
+    if (badge) { badge.textContent = allUsers.length; badge.style.display = allUsers.length ? '' : 'none'; }
+    if (!allUsers.length) {
+      document.getElementById('usersTbody').innerHTML = '<tr><td colspan="5" class="empty-state">No hay usuarios en la base de datos</td></tr>';
+      return;
+    }
     renderUsuarios(allUsers);
-  } catch(e) { toast('Error al cargar usuarios','err'); }
+  } catch(e) {
+    document.getElementById('usersTbody').innerHTML = `<tr><td colspan="5" class="empty-state" style="color:var(--danger)">Error: ${e.message}</td></tr>`;
+    toast('Error al cargar usuarios: '+e.message,'err');
+  }
 }
 
 function filtrarUsuarios(q) {
@@ -484,7 +497,7 @@ function renderUsuarios(list) {
       : `<div class="tbl-av">${ini}</div>`;
     const tipoPill = u.es_admin ? '<span class="pill pill-admin">ADMIN</span>' : u.tipo_cuenta==='fan' ? '<span class="pill pill-fan">Fan</span>' : '<span class="pill pill-art">Artista</span>';
     const planPill = u.plan==='pro' ? '<span class="pill pill-pro">PRO</span>' : '<span class="pill pill-free">Free</span>';
-    const fecha = new Date(u.creado_en).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+    const fecha = u.creado_en ? new Date(u.creado_en).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'}) : '—';
     const adminBtn = u.es_admin
       ? `<button class="btn-sm btn-warn" onclick="toggleAdmin('${u.id}',false,'${escH(u.nombre||u.email)}')">Quitar admin</button>`
       : `<button class="btn-sm btn-ok" onclick="toggleAdmin('${u.id}',true,'${escH(u.nombre||u.email)}')">Hacer admin</button>`;
@@ -522,8 +535,10 @@ async function eliminarUsuario(userId, nombre) {
 async function loadPosts() {
   document.getElementById('postsTbody').innerHTML = '<tr><td colspan="6" class="empty-state"><div class="spin" style="margin:0 auto"></div></td></tr>';
   try {
-    const { data } = await sb.from('tu_posts').select('*, tu_usuarios(nombre,email,avatar_url)').order('creado_en',{ascending:false}).limit(100);
+    const { data, error } = await sb.from('tu_posts').select('*, tu_usuarios(nombre,email,avatar_url)').order('creado_en',{ascending:false}).limit(100);
+    if (error) throw error;
     allPosts = data || [];
+    if (!allPosts.length) { document.getElementById('postsTbody').innerHTML='<tr><td colspan="6" class="empty-state">No hay publicaciones</td></tr>'; return; }
     renderPosts(allPosts);
   } catch(e) { toast('Error al cargar posts','err'); }
 }
