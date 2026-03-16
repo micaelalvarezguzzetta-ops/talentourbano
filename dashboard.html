@@ -2090,6 +2090,12 @@ function toast(msg,tipo='tok') {
 async function doLogout() { await sb.auth.signOut(); window.location.href='register.html'; }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeSpotifyModal(); closeComments(); closeShare(); closeUserProfile(); } });
 
+// Abrir perfil de usuario si viene desde admin
+if (window.location.hash && window.location.hash.startsWith('#perfil-')) {
+  const uid = window.location.hash.replace('#perfil-','');
+  if (uid) setTimeout(()=>openUserProfile(uid), 1200);
+}
+
 init();
 </script>
 </body>
