@@ -320,14 +320,39 @@ let tt = null;
 
 // ── INIT ──
 const loaderTimeout = setTimeout(() => hideLoader(), 8000);
+// Emails autorizados como administradores (whitelist extra de seguridad)
+const ADMIN_EMAILS = [
+  'micaelalvarezguzzetta@gmail.com',
+  'ruthsanchezg89@gmail.com'
+];
+
+function denyAccess() {
+  document.getElementById('loader').style.display = 'none';
+  document.body.style.overflow = 'hidden';
+  document.body.innerHTML = `<div style="position:fixed;inset:0;background:#080b10;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1.25rem;font-family:'DM Sans',sans-serif">
+    <div style="font-size:3rem">🚫</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;color:#ff4444">ACCESO DENEGADO</div>
+    <div style="font-size:.85rem;color:#5a6a7a;text-align:center">Solo administradores autorizados pueden acceder a este panel.<br>Si crees que es un error, contacta con el administrador.</div>
+    <a href="dashboard.html" style="margin-top:.5rem;color:#00e5ff;font-size:.82rem;text-decoration:none">← Volver al dashboard</a>
+  </div>`;
+}
+
 async function init() {
   try {
     const { data:{ session } } = await sb.auth.getSession();
     if (!session) { window.location.href = 'register.html'; return; }
 
+    // Verificación doble: BD + whitelist de emails
+    const userEmail = session.user.email?.toLowerCase();
     const { data: u } = await sb.from('tu_usuarios').select('*').eq('id', session.user.id).single();
-    if (!u || !u.es_admin) {
-      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:1rem"><div style="font-size:2rem">🚫</div><div style="font-family:\'Bebas Neue\',sans-serif;font-size:1.5rem;letter-spacing:2px;color:#ff4444">Acceso denegado</div><div style="font-size:.85rem;color:#5a6a7a">Solo administradores pueden acceder</div><a href="dashboard.html" style="margin-top:1rem;color:#00e5ff;font-size:.82rem">← Volver al dashboard</a></div>';
+    
+    const esAdminBD = u?.es_admin === true;
+    const esAdminWhitelist = ADMIN_EMAILS.map(e=>e.toLowerCase()).includes(userEmail);
+    
+    if (!u || !esAdminBD || !esAdminWhitelist) {
+      // Registrar intento fallido en consola (sin revelar info)
+      console.warn('Intento de acceso no autorizado bloqueado.');
+      denyAccess();
       return;
     }
     ME = u;
@@ -502,7 +527,7 @@ function renderUsuarios(list) {
       ? `<button class="btn-sm btn-warn" onclick="toggleAdmin('${u.id}',false,'${escH(u.nombre||u.email)}')">Quitar admin</button>`
       : `<button class="btn-sm btn-ok" onclick="toggleAdmin('${u.id}',true,'${escH(u.nombre||u.email)}')">Hacer admin</button>`;
     return `<tr>
-      <td><div style="display:flex;align-items:center;gap:.6rem">${avHtml}<div><div class="tbl-name">${escH(u.nombre||'—')}</div><div class="tbl-sub">${escH(u.email||'')}</div>${u.bio?`<div class="tbl-sub" style="font-style:italic">${escH(u.bio.substring(0,40))}</div>`:''}</div></div></td>
+      <td><div style="display:flex;align-items:center;gap:.6rem">${avHtml}<div><div class="tbl-name" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(0,229,255,.3)" onclick="verPerfilUsuario('${u.id}')" title="Ver perfil en el sitio">${escH(u.nombre||'—')}</div><div class="tbl-sub">${escH(u.email||'')}</div>${u.bio?`<div class="tbl-sub" style="font-style:italic">${escH(u.bio.substring(0,40))}</div>`:''}</div></div></td>
       <td>${tipoPill}</td>
       <td>${planPill}</td>
       <td style="font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace">${fecha}</td>
@@ -561,7 +586,7 @@ function renderPosts(list) {
     const contenido = (p.contenido||'Sin texto').substring(0,60)+(p.contenido?.length>60?'…':'');
     const fecha = new Date(p.creado_en).toLocaleDateString('es-ES',{day:'numeric',month:'short'});
     return `<tr>
-      <td><div style="display:flex;align-items:center;gap:.6rem">${avHtml}<div class="tbl-name">${escH(u.nombre||'—')}</div></div></td>
+      <td><div style="display:flex;align-items:center;gap:.6rem">${avHtml}<div class="tbl-name" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(0,229,255,.3)" onclick="verPerfilUsuario('${p.usuario_id}')" title="Ver perfil">${escH(u.nombre||'—')}</div></div></td>
       <td style="max-width:240px"><span style="color:var(--muted2)">${badges}</span> ${escH(contenido)}</td>
       <td style="text-align:center"><span style="color:var(--accent2)">❤️ ${p.likes_count||0}</span></td>
       <td style="text-align:center"><span style="color:#6699ff">💬 ${p.comentarios_count||0}</span></td>
@@ -688,6 +713,11 @@ function confirm2(msg, cb, danger=false) {
 }
 document.getElementById('confirmOkBtn').onclick = ()=>{ closeConfirm(); if(confirmCallback) confirmCallback(); };
 function closeConfirm() { document.getElementById('confirmModal').classList.remove('show'); confirmCallback=null; }
+
+function verPerfilUsuario(userId) {
+  // Abrir dashboard con el perfil de ese usuario
+  window.open(`dashboard.html#perfil-${userId}`, '_blank');
+}
 
 async function doLogout() { await sb.auth.signOut(); window.location.href='register.html'; }
 
